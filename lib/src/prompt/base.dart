@@ -1,7 +1,7 @@
 import "package:prompt/prompt.dart";
 
 abstract final class BasePromptDefaults {
-  static const Color accentColor = Color.brightBlue;
+  static const Color accentColor = Colors.brightBlue;
 }
 
 Result<String> basePrompt(
@@ -10,12 +10,11 @@ Result<String> basePrompt(
   String? hint,
   Color accentColor = BasePromptDefaults.accentColor,
 }) {
-  String formattedQuestion = question.bold();
   bool hasFailed = false;
 
   void displaySuccess(String answer) {
     stdout.write("+".color(accentColor));
-    stdout.write(" $formattedQuestion ");
+    stdout.write(" $question ");
     stdout.writeln(answer.color(accentColor));
   }
 
@@ -44,7 +43,7 @@ Result<String> basePrompt(
   stdout.write("?".color(accentColor));
 
   for (;;) {
-    stdout.write(" $formattedQuestion ");
+    stdout.write(" $question ");
     if (hint != null) {
       stdout.write("($hint) ".brightBlack());
     }

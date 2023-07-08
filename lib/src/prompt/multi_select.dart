@@ -10,7 +10,7 @@ abstract final class MultiSelectPromptDefaults {
 
   static const String hint = "";
 
-  static const Color accentColor = Color.brightBlue;
+  static const Color accentColor = Colors.brightBlue;
 }
 
 abstract final class MultiSelectPromptSettings {
@@ -32,7 +32,6 @@ Result<List<T>> multiSelectPrompt<T>(
   assert(0 <= start && start < choices.length, "[start] must be a valid index!");
   assert(view > 0, "view must be greater than 0.");
 
-  String formattedQuestion = question.bold();
   int activeIndex = start;
 
   Set<int> chosenIndices = <int>{};
@@ -231,7 +230,7 @@ Result<List<T>> multiSelectPrompt<T>(
         stdout.write("?".color(accentColor));
       }
       stdout.space();
-      stdout.write(formattedQuestion);
+      stdout.write(question);
       if (hint.isNotEmpty) {
         stdout.space();
         stdout.write("($hint)".brightBlack());
@@ -294,7 +293,7 @@ Result<List<T>> multiSelectPrompt<T>(
       }
 
       stdout.write("+".color(accentColor));
-      stdout.write(" $formattedQuestion ");
+      stdout.write(" $question ");
       for (void _ in stdout.contextBlock) {
         stdout.foregroundColor = accentColor;
 
@@ -313,7 +312,7 @@ Result<List<T>> multiSelectPrompt<T>(
 
     /// Display the failure
     stdout.write("!".brightRed());
-    stdout.write(" $formattedQuestion ");
+    stdout.write(" $question ");
     stdout.writeln("^C".brightBlack());
 
     return Failure<List<T>>("^C");

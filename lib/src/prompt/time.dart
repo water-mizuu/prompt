@@ -2,7 +2,7 @@ import "package:prompt/prompt.dart";
 import "package:prompt/src/io/exception.dart";
 
 class TimePromptDefaults {
-  static const Color accentColor = Color.brightBlue;
+  static const Color accentColor = Colors.brightBlue;
 }
 
 enum _FocusMode { hour, minute, meridiem }
@@ -222,9 +222,9 @@ Result<DateTime> timePrompt(
               .color(accentColor),
         );
 
-      stdout.write$(buffer);
-      stdout.moveDown();
+      stdout.writeln(buffer);
     }
+
     return Success<DateTime>(
       DateTime(
         start.year,

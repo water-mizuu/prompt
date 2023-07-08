@@ -9,6 +9,23 @@ abstract base class Color implements TextDecoration {
   const factory Color.rgb({required int r, required int g, required int b}) = RgbColor;
   const factory Color.ansi({required int code}) = AnsiColor;
 
+  String get ansi;
+  String escapeForeground();
+  String escapeBackground();
+
+  @override
+  String call(String content) => callForeground(content);
+
+  String callForeground(String content) => "${stdout.escape(this.escapeForeground())}"
+      "$content"
+      "${stdout.escape(stdout.currentContext.foregroundColor.escapeForeground())}";
+
+  String callBackground(String content) => "${stdout.escape(this.escapeBackground())}"
+      "$content"
+      "${stdout.escape(stdout.currentContext.foregroundColor.escapeBackground())}";
+}
+
+abstract final class Colors {
   static const Color black = Color.ansi(code: 30);
   static const Color red = Color.ansi(code: 31);
   static const Color green = Color.ansi(code: 32);
@@ -27,15 +44,6 @@ abstract base class Color implements TextDecoration {
   static const Color brightMagenta = Color.ansi(code: 95);
   static const Color brightCyan = Color.ansi(code: 96);
   static const Color brightWhite = Color.ansi(code: 97);
-
-  String get ansi;
-  String escapeForeground();
-  String escapeBackground();
-
-  @override
-  String call(String content) => "${stdout.escape(this.escapeForeground())}"
-      "$content"
-      "${stdout.escape(stdout.currentContext.foregroundColor.escapeForeground())}";
 }
 
 final class RgbColor extends Color {
@@ -73,21 +81,24 @@ final class AnsiColor extends Color {
 extension StringColorExtension on String {
   String color(Color color, {bool iff = true}) => iff ? color(this) : this;
 
-  String black({bool iff = true}) => this.color(Color.black, iff: iff);
-  String red({bool iff = true}) => this.color(Color.red, iff: iff);
-  String green({bool iff = true}) => this.color(Color.green, iff: iff);
-  String yellow({bool iff = true}) => this.color(Color.yellow, iff: iff);
-  String blue({bool iff = true}) => this.color(Color.blue, iff: iff);
-  String magenta({bool iff = true}) => this.color(Color.magenta, iff: iff);
-  String cyan({bool iff = true}) => this.color(Color.cyan, iff: iff);
-  String white({bool iff = true}) => this.color(Color.white, iff: iff);
-  String reset({bool iff = true}) => this.color(Color.reset, iff: iff);
-  String brightBlack({bool iff = true}) => this.color(Color.brightBlack, iff: iff);
-  String brightRed({bool iff = true}) => this.color(Color.brightRed, iff: iff);
-  String brightGreen({bool iff = true}) => this.color(Color.brightGreen, iff: iff);
-  String brightYellow({bool iff = true}) => this.color(Color.brightYellow, iff: iff);
-  String brightBlue({bool iff = true}) => this.color(Color.brightBlue, iff: iff);
-  String brightMagenta({bool iff = true}) => this.color(Color.brightMagenta, iff: iff);
-  String brightCyan({bool iff = true}) => this.color(Color.brightCyan, iff: iff);
-  String brightWhite({bool iff = true}) => this.color(Color.brightWhite, iff: iff);
+  String foreground(Color color, {bool iff = true}) => iff ? color.callForeground(this) : this;
+  String background(Color color, {bool iff = true}) => iff ? color.callBackground(this) : this;
+
+  String black({bool iff = true}) => this.color(Colors.black, iff: iff);
+  String red({bool iff = true}) => this.color(Colors.red, iff: iff);
+  String green({bool iff = true}) => this.color(Colors.green, iff: iff);
+  String yellow({bool iff = true}) => this.color(Colors.yellow, iff: iff);
+  String blue({bool iff = true}) => this.color(Colors.blue, iff: iff);
+  String magenta({bool iff = true}) => this.color(Colors.magenta, iff: iff);
+  String cyan({bool iff = true}) => this.color(Colors.cyan, iff: iff);
+  String white({bool iff = true}) => this.color(Colors.white, iff: iff);
+  String reset({bool iff = true}) => this.color(Colors.reset, iff: iff);
+  String brightBlack({bool iff = true}) => this.color(Colors.brightBlack, iff: iff);
+  String brightRed({bool iff = true}) => this.color(Colors.brightRed, iff: iff);
+  String brightGreen({bool iff = true}) => this.color(Colors.brightGreen, iff: iff);
+  String brightYellow({bool iff = true}) => this.color(Colors.brightYellow, iff: iff);
+  String brightBlue({bool iff = true}) => this.color(Colors.brightBlue, iff: iff);
+  String brightMagenta({bool iff = true}) => this.color(Colors.brightMagenta, iff: iff);
+  String brightCyan({bool iff = true}) => this.color(Colors.brightCyan, iff: iff);
+  String brightWhite({bool iff = true}) => this.color(Colors.brightWhite, iff: iff);
 }

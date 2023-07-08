@@ -30,8 +30,8 @@ class CustomError extends Error {
   String toString() => stdout.boxify(
         title: title,
         "$main${invalidValue != null ? " ($invalidValue)" : ""}. $message",
-        color: Color.brightRed,
-        textColor: Color.red,
+        color: Colors.brightRed,
+        textColor: Colors.red,
       );
 }
 

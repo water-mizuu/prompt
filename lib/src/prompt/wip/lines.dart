@@ -5,12 +5,16 @@ Result<String> linesPrompt(
   String question, {
   Guard<String>? guard,
   String? example,
-  Color accentColor = Color.brightBlue,
+  Color accentColor = Colors.brightBlue,
 }) {
   String formattedQuestion = question.bold();
   int y = 0;
   int x = 0;
-  List2<String> content = "".trimRight().split("\n").map((String line) => line.split("")).toList();
+  List2<String> content = ""
+      .trimRight() //
+      .split("\n")
+      .map((String line) => line.split(""))
+      .toList();
 
   void padContent() {
     if (y > content.length - 1) {
@@ -223,7 +227,7 @@ Result<String> linesPrompt(
           ..write(" $formattedQuestion ")
           ..write("// CTRL+D to confirm".brightBlack());
 
-        stdout.writeln$(buffer);
+        stdout.writeln(buffer);
       }
 
       for (List<String> line in content) {
@@ -330,7 +334,7 @@ extension PromptMultiLineExtension on BasePrompt {
     String question, {
     Guard<String>? guard,
     String? example,
-    Color accentColor = Color.brightBlue,
+    Color accentColor = Colors.brightBlue,
   }) =>
       linesPrompt(
         question,

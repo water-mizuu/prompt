@@ -7,8 +7,8 @@ import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
 
 final class StdoutContext {
   StdoutContext({
-    this.backgroundColor = Color.reset,
-    this.foregroundColor = Color.reset,
+    this.backgroundColor = Colors.reset,
+    this.foregroundColor = Colors.reset,
     this.isCursorHidden = false,
     this.isBold = false,
     this.isFaint = false,
@@ -26,8 +26,8 @@ final class StdoutContext {
   });
 
   StdoutContext.empty()
-      : this.foregroundColor = Color.reset,
-        this.backgroundColor = Color.reset,
+      : this.foregroundColor = Colors.reset,
+        this.backgroundColor = Colors.reset,
         this.isCursorHidden = false,
         this.isBold = false,
         this.isFaint = false,

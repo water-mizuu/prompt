@@ -37,7 +37,7 @@ extension StdoutBoxExtension on WrappedStdout {
               .padVisibleRight(writableColumns, "─");
 
       String topBar = "┌─$topDisplay─┐" //
-          .map((String line) => enableColor ? line.color(color ?? Color.reset) : line);
+          .map((String line) => enableColor ? line.color(color ?? Colors.reset) : line);
 
       String content = value
           .wrapVisible(writableColumns) //
@@ -45,14 +45,14 @@ extension StdoutBoxExtension on WrappedStdout {
           .map((String line) => line.padVisibleRight(writableColumns))
           .map(
             (String line) => <String>[
-              if (enableColor) "│".color(color ?? Color.reset) else "│",
-              if (enableColor) line.color(color ?? Color.reset) else line,
-              if (enableColor) "│".color(color ?? Color.reset) else "│",
+              if (enableColor) "│".color(color ?? Colors.reset) else "│",
+              if (enableColor) line.color(color ?? Colors.reset) else line,
+              if (enableColor) "│".color(color ?? Colors.reset) else "│",
             ].join(" "),
           )
           .join("\n");
       String bottomBar = "└─${"".padVisibleRight(writableColumns, "─")}─┘"
-          .map((String line) => enableColor ? line.color(color ?? Color.reset) : line);
+          .map((String line) => enableColor ? line.color(color ?? Colors.reset) : line);
 
       buffer
         ..writeln(topBar)
@@ -66,8 +66,8 @@ extension StdoutBoxExtension on WrappedStdout {
   void box(
     Object? value, {
     String title = "",
-    Color textColor = Color.reset,
-    Color color = Color.reset,
+    Color textColor = Colors.reset,
+    Color color = Colors.reset,
   }) {
     context(() {
       String display = boxify(
@@ -87,8 +87,8 @@ extension StdoutBoxShortcutExtension on void Function(Object? value, {String tit
     stdout.box(
       value,
       title: title,
-      color: Color.brightGreen,
-      textColor: Color.green,
+      color: Colors.brightGreen,
+      textColor: Colors.green,
     );
   }
 
@@ -96,8 +96,8 @@ extension StdoutBoxShortcutExtension on void Function(Object? value, {String tit
     stdout.box(
       value,
       title: title,
-      color: Color.brightRed,
-      textColor: Color.red,
+      color: Colors.brightRed,
+      textColor: Colors.red,
     );
   }
 
@@ -105,8 +105,8 @@ extension StdoutBoxShortcutExtension on void Function(Object? value, {String tit
     stdout.box(
       value,
       title: title,
-      color: Color.brightBlue,
-      textColor: Color.blue,
+      color: Colors.brightBlue,
+      textColor: Colors.blue,
     );
   }
 }

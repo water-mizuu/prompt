@@ -2,7 +2,6 @@ import "dart:core" as core show BigInt, bool, double, int;
 import "dart:core";
 
 import "package:prompt/src/io/decoration/color.dart";
-import "package:prompt/src/io/decoration/style.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
@@ -12,7 +11,7 @@ import "package:prompt/src/types.dart";
 
 abstract final class ParsedPromptDefaults {
   static const bool repeat = true;
-  static const Color accentColor = Color.brightBlue;
+  static const Color accentColor = Colors.brightBlue;
 }
 
 Result<T> parsedPrompt<T>(
@@ -22,12 +21,11 @@ Result<T> parsedPrompt<T>(
   String? hint,
   Color accentColor = BasePromptDefaults.accentColor,
 }) {
-  String formattedQuestion = question.bold();
   bool hasFailed = false;
 
   void displaySuccess(T answer) {
     stdout.write("+".color(accentColor));
-    stdout.write(" $formattedQuestion ");
+    stdout.write(" $question ");
     stdout.writeln("$answer".color(accentColor));
   }
 
@@ -56,7 +54,7 @@ Result<T> parsedPrompt<T>(
   stdout.write("?".color(accentColor));
 
   for (;;) {
-    stdout.write(" $formattedQuestion ");
+    stdout.write(" $question ");
     if (hint != null) {
       stdout.write("($hint) ".brightBlack());
     }

@@ -202,3 +202,7 @@ extension DateExtension on DateTime {
 extension BigIntExtension<N extends num> on N {
   BigInt get n => BigInt.from(this);
 }
+
+extension DateTimeExtension on DateTime {
+  int get dayCount => DateTime(year, month + 1, 0).day;
+}

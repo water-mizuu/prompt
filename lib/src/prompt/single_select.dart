@@ -7,7 +7,7 @@ abstract final class SingleSelectPromptDefaults {
   static const int start = 0;
   static const int view = 6;
 
-  static const Color accentColor = Color.brightBlue;
+  static const Color accentColor = Colors.brightBlue;
 }
 
 Result<T> singleSelectPrompt<T>(
@@ -23,7 +23,6 @@ Result<T> singleSelectPrompt<T>(
   assert(0 <= start && start < choices.length, "[start] must be a valid index!");
   assert(view > 0, "view must be greater than 0.");
 
-  String formattedQuestion = question.bold();
   int activeIndex = start;
   T chosen = choices[activeIndex];
 
@@ -209,7 +208,7 @@ Result<T> singleSelectPrompt<T>(
         stdout.write("?".color(accentColor));
       }
       stdout.space();
-      stdout.write(formattedQuestion);
+      stdout.write(question);
       if (hint != null) {
         stdout.space();
         stdout.write("($hint)".brightBlack());
@@ -252,7 +251,7 @@ Result<T> singleSelectPrompt<T>(
       } else {
         /// Display the answer.
         stdout.write("+".color(accentColor));
-        stdout.write(" $formattedQuestion ");
+        stdout.write(" $question ");
         stdout.writeln("$chosen".color(accentColor));
 
         return Success<T>(chosen);
@@ -264,7 +263,7 @@ Result<T> singleSelectPrompt<T>(
 
     /// Display the failure
     stdout.write("!".brightRed());
-    stdout.write(" $formattedQuestion ");
+    stdout.write(" $question ");
     stdout.writeln("^C".brightBlack());
 
     return Failure<T>("^C");

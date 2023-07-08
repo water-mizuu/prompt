@@ -88,21 +88,21 @@ final class Style implements TextDecoration {
 }
 
 extension StringStyleExtension on String {
-  String decorate(TextDecoration decoration) => decoration(this);
+  String decorate(TextDecoration decoration, {bool iff = true}) => iff ? decoration(this) : this;
 
-  String bold() => this.decorate(Style.bold);
-  String faint() => this.decorate(Style.faint);
-  String italic() => this.decorate(Style.italic);
-  String underlined() => this.decorate(Style.underlined);
-  String blinking() => this.decorate(Style.blinking);
-  String blinkingFast() => this.decorate(Style.blinkingFast);
-  String reverse() => this.decorate(Style.reverse);
-  String inverted() => this.decorate(Style.inverted);
-  String hidden() => this.decorate(Style.hidden);
-  String strikeThrough() => this.decorate(Style.strikeThrough);
-  String gothic() => this.decorate(Style.gothic);
-  String doubleUnderline() => this.decorate(Style.doubleUnderline);
-  String framed() => this.decorate(Style.framed);
-  String encircled() => this.decorate(Style.encircled);
-  String overlined() => this.decorate(Style.overlined);
+  String bold({bool iff = true}) => this.decorate(Style.bold, iff: iff);
+  String faint({bool iff = true}) => this.decorate(Style.faint, iff: iff);
+  String italic({bool iff = true}) => this.decorate(Style.italic, iff: iff);
+  String underlined({bool iff = true}) => this.decorate(Style.underlined, iff: iff);
+  String blinking({bool iff = true}) => this.decorate(Style.blinking, iff: iff);
+  String blinkingFast({bool iff = true}) => this.decorate(Style.blinkingFast, iff: iff);
+  String reverse({bool iff = true}) => this.decorate(Style.reverse, iff: iff);
+  String inverted({bool iff = true}) => this.decorate(Style.inverted, iff: iff);
+  String hidden({bool iff = true}) => this.decorate(Style.hidden, iff: iff);
+  String strikeThrough({bool iff = true}) => this.decorate(Style.strikeThrough, iff: iff);
+  String gothic({bool iff = true}) => this.decorate(Style.gothic, iff: iff);
+  String doubleUnderlined({bool iff = true}) => this.decorate(Style.doubleUnderline, iff: iff);
+  String framed({bool iff = true}) => this.decorate(Style.framed, iff: iff);
+  String encircled({bool iff = true}) => this.decorate(Style.encircled, iff: iff);
+  String overlined({bool iff = true}) => this.decorate(Style.overlined, iff: iff);
 }

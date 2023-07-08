@@ -7,3 +7,5 @@ typedef Guard<T> = (GuardFunction<T>, String);
 typedef Parser<T> = (ParseFunction<T>, String);
 
 typedef List2<E> = List<List<E>>;
+
+typedef Lazy<T> = T Function();

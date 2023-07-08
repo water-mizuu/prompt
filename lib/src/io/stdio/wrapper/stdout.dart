@@ -34,13 +34,13 @@ extension StdoutExtension on WrappedStdout {
 
   /// Resets the foreground color of the current context to the default.
   void resetForegroundColor() {
-    contextStack.last.foregroundColor = Color.reset;
+    contextStack.last.foregroundColor = Colors.reset;
     update();
   }
 
   /// Resets the foreground color of the background context to the default.
   void resetBackgroundColor() {
-    contextStack.last.backgroundColor = Color.reset;
+    contextStack.last.backgroundColor = Colors.reset;
     update();
   }
 
@@ -119,11 +119,6 @@ extension StdoutExtension on WrappedStdout {
         moveLeft(string.visibleLength);
       }
     }
-  }
-
-  void writeln$([Object object = ""]) {
-    write$(object);
-    moveDown();
   }
 
   void saveCursor() {
