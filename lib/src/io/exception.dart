@@ -1,0 +1,1 @@
+class SignalInterruptionException implements Exception {}
