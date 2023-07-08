@@ -6,12 +6,12 @@ sealed class Result<T> {
   const factory Result.success(T value) = Success<T>;
   const factory Result.failure(String failure) = Failure<T>;
 
-  abstract final T result;
+  abstract final T value;
   abstract final String failure;
 
   T orElse(T Function() orElse);
-  Result<O> map<O>(O Function(T) callback);
-  Result<O> expand<O>(Result<O> Function(T) callback);
+  Result<O> map<O>(O Function(T value) callback);
+  Result<O> expand<O>(Result<O> Function(T value) callback);
   Result<T> where(Predicate<T> predicate);
 
   T unwrap();
@@ -22,7 +22,7 @@ final class Failure<T> implements Result<T> {
   const Failure(this.failure);
 
   @override
-  Never get result => throw UnsupportedError("An failure object does not contain a [result].");
+  Never get value => throw UnsupportedError("An failure object does not contain a [result].");
 
   @override
   final String failure;
@@ -51,32 +51,32 @@ final class Failure<T> implements Result<T> {
 }
 
 final class Success<T> implements Result<T> {
-  const Success(this.result);
+  const Success(this.value);
 
   @override
-  final T result;
+  final T value;
 
   @override
   String get failure => throw UnsupportedError("A success object does not contain a [failure].");
 
   @override
-  T orElse(T Function() orElse) => result;
+  T orElse(T Function() orElse) => value;
 
   @override
-  Success<O> map<O>(O Function(T) callback) => Success<O>(callback(result));
+  Success<O> map<O>(O Function(T) callback) => Success<O>(callback(value));
 
   @override
-  Result<O> expand<O>(Result<O> Function(T) callback) => callback(result);
+  Result<O> expand<O>(Result<O> Function(T) callback) => callback(value);
 
   @override
   Result<T> where(Predicate<T> callback, [String message = "Filter failure"]) =>
-      callback(result) ? this : Failure<T>(message);
+      callback(value) ? this : Failure<T>(message);
 
   @override
-  T nullable() => result;
+  T nullable() => value;
 
   @override
-  T unwrap() => result;
+  T unwrap() => value;
 }
 
 extension FutureFailureOrMethods<E> on Future<Result<E>> {
