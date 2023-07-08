@@ -75,9 +75,29 @@ abstract final class Guards {
   static Guard<DateTime> after(DateTime value) =>
       ((DateTime v) => v.isAfter(value), "Must be after $value!");
 
+  static Guard<DateTime> beforeOrOn(DateTime value) => (
+        (DateTime v) => v.isBefore(value.add(const Duration(days: 1))),
+        "Must be before or on $value!",
+      );
+
+  static Guard<DateTime> afterOrOn(DateTime value) => (
+        (DateTime v) => v.isAfter(value.subtract(const Duration(days: 1))),
+        "Must be after or on $value!",
+      );
+
   static Guard<DateTime> beforeNow() =>
       ((DateTime v) => v.isBefore(DateTime.now()), "Must be before today!");
 
   static Guard<DateTime> afterNow() =>
       ((DateTime v) => v.isAfter(DateTime.now()), "Must be after today!");
+
+  static Guard<DateTime> beforeOrOnNow() => (
+        (DateTime v) => v.isBefore(DateTime.now().add(const Duration(days: 1))),
+        "Must be today or before today!"
+      );
+
+  static Guard<DateTime> afterOrOnNow() => (
+        (DateTime v) => v.isAfter(DateTime.now().subtract(const Duration(days: 1))),
+        "Must be today or after today!"
+      );
 }
