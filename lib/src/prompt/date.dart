@@ -14,10 +14,8 @@ import "package:prompt/src/types.dart";
 
 abstract final class DatePromptDefaults {
   static const bool minimal = false;
-  static const Color accentColor = Color.brightBlue;
+  static const Color accentColor = Colors.brightBlue;
 }
-
-const List<String> _daysOfTheWeek = <String>["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 enum _Focus {
   year,
@@ -29,15 +27,22 @@ enum _Focus {
 Result<DateTime> datePrompt(
   String question, {
   DateTime? start,
+  Guard<DateTime>? guard,
+  String? hint,
   bool minimal = DatePromptDefaults.minimal,
   Color accentColor = DatePromptDefaults.accentColor,
 }) {
-  String formattedQuestion = question.bold();
   start ??= DateTime.now();
 
+  DateTime currentDateTime = DateTime.now();
+  bool hasFailed = false;
+
   // Constants that will be used in the program in building the calendar.
+  const List<String> daysOfTheWeek = <String>["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const int paddingSize = 4;
-  const int calendarWidth = 7;
+  // const List<String> daysOfTheWeek = <String>["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  // const int paddingSize = 3;
+  const int horizontalCellCount = 7;
 
   // A value determining which part of the form is focused.
   _Focus focus = _Focus.calendar;
@@ -80,25 +85,25 @@ Result<DateTime> datePrompt(
     previousMonth = DateTime(activeYear, activeMonth - 1);
     currentMonth = DateTime(activeYear, activeMonth);
 
-    skippedDays = currentMonth.weekday % 7;
+    skippedDays = currentMonth.weekday % horizontalCellCount;
     monthIndex = activeMonth - 1;
 
-    previousDaysOfTheMonth = DateTime(previousMonth.year, previousMonth.month + 1, 0).day;
-    daysOfTheMonth = DateTime(currentMonth.year, currentMonth.month + 1, 0).day;
+    previousDaysOfTheMonth = previousMonth.dayCount;
+    daysOfTheMonth = currentMonth.dayCount;
 
-    calendarHeight = ((skippedDays + daysOfTheMonth) / calendarWidth).ceil();
+    calendarHeight = ((skippedDays + daysOfTheMonth) / 7).ceil();
 
     calendarGrid = List2<int>.generate(
       calendarHeight,
       (int y) => List<int>.generate(
-        calendarWidth,
-        (int x) => (y * calendarWidth + x) - skippedDays + 1,
+        horizontalCellCount,
+        (int x) => (y * horizontalCellCount + x) - skippedDays + 1,
       ),
     );
 
     active = DateTime(activeYear, activeMonth, activeDay);
-    activeX = active.weekday % 7;
-    activeY = (skippedDays + activeDay - 1) ~/ calendarWidth;
+    activeX = active.weekday % horizontalCellCount;
+    activeY = (skippedDays + activeDay - 1) ~/ horizontalCellCount;
   }
 
   void displayTitleCard() {
@@ -127,61 +132,57 @@ Result<DateTime> datePrompt(
 
   void displayDayLabels() {
     // Print the labels for the days of the week
-    StringBuffer dayOfTheWeekBuffer = StringBuffer("│");
-    for (int i = 0; i < 7; ++i) {
-      String paddedDisplay = _daysOfTheWeek[i].padVisibleLeft(paddingSize);
+    stdout.write("│");
+    for (int i = 0; i < horizontalCellCount; ++i) {
+      String paddedDisplay = daysOfTheWeek[i].padVisibleLeft(paddingSize);
       String formattedDisplay = switch (i) {
         0 => paddedDisplay.brightRed(),
         _ => paddedDisplay,
       };
 
       // If it is sunday, print it red.
-      dayOfTheWeekBuffer.write(formattedDisplay);
+      stdout.write(formattedDisplay);
     }
-    dayOfTheWeekBuffer.write("│");
-    stdout.write$(dayOfTheWeekBuffer.toString());
+    stdout.write("│");
   }
 
-  void displayCalendarRow(int y, {bool isActiveColorDisabled = false}) {
-    StringBuffer stream = StringBuffer("│");
-
-    for (int x = 0; x < calendarWidth; ++x) {
+  void displayCalendarRow(int y, {bool isActiveColorEnabled = true}) {
+    stdout.write("│");
+    for (int x = 0; x < horizontalCellCount; ++x) {
       int day = calendarGrid[y][x];
 
+      bool isFocused = focus == _Focus.calendar;
+      bool isActive = y == activeY && x == activeX;
+      bool isToday = activeYear == currentDateTime.year &&
+          activeMonth == currentDateTime.month &&
+          day == currentDateTime.day;
+
       Color color = switch (day) {
-        < 1 => Color.brightBlack,
-        _ when day > daysOfTheMonth => Color.brightBlack,
-        _ when x == 0 => Color.brightRed,
-        _ => Color.reset,
+        < 1 => Colors.brightBlack,
+        _ when day > daysOfTheMonth => Colors.brightBlack,
+        _ when x == 0 => Colors.brightRed,
+        _ => Colors.reset,
       };
 
-      String toDisplay = switch (day) {
-        _
-            when focus == _Focus.calendar && //
-                !isActiveColorDisabled &&
-                y == activeY &&
-                x == activeX =>
-          day.toString().inverted(),
-        _ when day < 1 => //
-          (previousDaysOfTheMonth + day).toString(),
-        _ when day > daysOfTheMonth => //
-          (day - daysOfTheMonth).toString(),
-        _ => //
-          day.toString(),
-      } //
-          .color(color);
+      String display = switch (day) {
+        _ when day < 1 => previousDaysOfTheMonth + day,
+        _ when day > daysOfTheMonth => day - daysOfTheMonth,
+        _ => day,
+      }
+          .toString()
+          .padVisibleLeft(2)
+          .bold(iff: isToday)
+          .color(color)
+          .inverted(iff: isFocused && isActiveColorEnabled && isActive)
+          .padVisibleLeft(paddingSize);
 
-      String paddedDisplay = toDisplay.padVisibleLeft(paddingSize);
-      String formattedDisplay = paddedDisplay;
-
-      stream.write(formattedDisplay);
+      stdout.write(display);
     }
 
-    stream.write("│");
-    stdout.write$(stream.toString());
+    stdout.write("│");
   }
 
-  void displayActiveMonth() {
+  void displayCalendar() {
     displayTitleCard();
     stdout.writeln();
     displayDayLabels();
@@ -194,34 +195,34 @@ Result<DateTime> datePrompt(
   }
 
   void updateCalendar() {
-    stdout.movelnUp(activeY + 2);
+    stdout.movelnUp(activeY + 1 /** Weekday Label */ + 1 /** Title Card */);
     stdout.eraselnDown(calendarHeight + 1);
 
     computeActives();
-    displayActiveMonth();
+    displayCalendar();
 
     stdout.movelnUp(calendarHeight - activeY);
   }
 
   void updateTitleCard() {
-    stdout.moveUp(activeY + 2);
+    stdout.moveUp(activeY + 1 /** Weekday Label */ + 1 /** Title Card */);
     stdout.eraseln();
     displayTitleCard();
-    stdout.moveDown(activeY + 2);
+    stdout.moveDown(activeY + 1 /** Weekday Label */ + 1 /** Title Card */);
   }
 
   void moveHorizontal(int difference) {
     activeX += difference;
 
     stdout.eraseln();
-    displayCalendarRow(activeY, isActiveColorDisabled: true);
+    displayCalendarRow(activeY);
 
-    if (activeX > calendarWidth - 1) {
-      activeX %= calendarWidth;
+    if (activeX > horizontalCellCount - 1) {
+      activeX %= horizontalCellCount;
       activeY += 1;
       stdout.moveDown();
     } else if (activeX < 0) {
-      activeX %= calendarWidth;
+      activeX %= horizontalCellCount;
       activeY -= 1;
       stdout.moveUp();
     }
@@ -234,28 +235,28 @@ Result<DateTime> datePrompt(
       activeDay += difference;
     }
 
-    if (activeDay > daysOfTheMonth || activeDay < 1) {
-      updateCalendar();
-    } else {
+    if (1 <= activeDay && activeDay <= daysOfTheMonth) {
       stdout.eraseln();
       displayCalendarRow(activeY);
       updateTitleCard();
+    } else {
+      updateCalendar();
     }
   }
 
   void moveVertical(int difference) {
     stdout.eraseln();
-    displayCalendarRow(activeY, isActiveColorDisabled: true);
+    displayCalendarRow(activeY, isActiveColorEnabled: false);
 
     activeY += difference;
     stdout.moveVertical(difference);
 
     if (activeY < 0) {
-      activeDay -= 7;
+      activeDay -= horizontalCellCount;
     } else if (activeY > calendarHeight - 1) {
-      activeDay += 7;
+      activeDay += horizontalCellCount;
     } else {
-      activeDay += difference * 7;
+      activeDay += difference * horizontalCellCount;
     }
 
     if (activeY < 0 ||
@@ -271,12 +272,20 @@ Result<DateTime> datePrompt(
   }
 
   void clearScreen() {
-    if (focus case _Focus.calendar) {
-      stdout.moveUp(activeY + 2);
-    }
-    stdout.moveUp();
+    int increment = hasFailed ? 1 : 0;
 
-    stdout.eraselnDown(calendarHeight + 3);
+    if (focus case _Focus.calendar) {
+      stdout.moveUp(activeY + 1 /** Weekday Label */ + 1 /** Title Card */ + increment);
+    }
+    stdout.moveUp(/** Question */);
+
+    stdout.eraselnDown(
+      calendarHeight + //
+          1 /** Question */ +
+          1 /** Title Card */ +
+          1 /** Weekday Label */ +
+          increment,
+    );
   }
 
   void moveToTitleFromTitle(_Focus to) {
@@ -290,173 +299,178 @@ Result<DateTime> datePrompt(
     stdout.eraseln();
     focus = to;
 
-    displayActiveMonth();
+    displayCalendar();
     stdout.moveUp(calendarHeight - activeY);
   }
 
   void moveToTitleFromCalendar(_Focus to) {
     /// Remove the focus from the calendar.
     stdout.eraseln();
-    displayCalendarRow(activeY, isActiveColorDisabled: true);
+    displayCalendarRow(activeY);
 
     focus = to;
 
     /// Rerender the title.
-    stdout.moveUp(activeY + 2);
+    stdout.moveUp(activeY + 1 /** Weekday Label */ + 1 /** Title Card */);
     stdout.eraseln();
     displayTitleCard();
   }
 
-  computeActives();
-
-  {
-    StringBuffer buffer = StringBuffer()
-      ..write("?".color(accentColor))
-      ..write(" $formattedQuestion ");
-
-    stdout.write$(buffer);
-    stdout.moveDown();
-  }
-
-  displayActiveMonth();
-
-  stdout.moveUp(calendarHeight - activeY);
   try {
     stdout.push();
     stdout.hideCursor();
 
-    loop:
-    for (List<int> code in stdin.sync) {
-      switch (code) {
-        case <int>[0x3]:
-          throw SignalInterruptionException();
-        case <int>[0x9]:
-          // tab
-          switch (focus) {
-            case _Focus.calendar:
-              moveToTitleFromCalendar(_Focus.year);
-            case _Focus.year:
-              moveToTitleFromTitle(_Focus.month);
-            case _Focus.month:
-              moveToTitleFromTitle(_Focus.day);
-            case _Focus.day:
-              moveToCalendarFromTitle(_Focus.calendar);
-          }
-        case <int>[0x1b, 0x5b, 0x5a]:
-          // shift + tab
-          switch (focus) {
-            case _Focus.calendar:
-              moveToTitleFromCalendar(_Focus.day);
-            case _Focus.day:
-              moveToTitleFromTitle(_Focus.month);
-            case _Focus.month:
-              moveToTitleFromTitle(_Focus.year);
-            case _Focus.year:
-              moveToCalendarFromTitle(_Focus.calendar);
-          }
-        case <int>[0x0d]:
-          // enter
-          active = DateTime(activeYear, activeMonth, activeDay);
-          break loop;
-        default:
-          void titularRefreshCalendar() {
-            stdout.eraselnDown(calendarHeight + 2);
+    for (;;) {
+      computeActives();
 
-            computeActives();
-            displayActiveMonth();
+      stdout.write("?".color(accentColor));
+      stdout.write(" $question ");
+      if (hint != null) {
+        stdout.write("($hint)".brightBlack());
+      }
+      stdout.writeln();
 
-            stdout.moveUp(calendarHeight + 2);
-          }
-          switch (focus) {
-            case _Focus.year:
-              switch (code) {
-                case <int>[0x1b, 0x5b, 0x41]:
-                  // up
-                  activeYear -= 1;
-                  titularRefreshCalendar();
-                case <int>[0x1b, 0x5b, 0x42]:
-                  // down
-                  activeYear += 1;
-                  titularRefreshCalendar();
-                case <int>[0x1b, 0x5b, 0x43]:
-                  // right
-                  moveToTitleFromTitle(_Focus.month);
-                case <int>[0x1b, 0x5b, 0x44]:
-                  // left
-                  moveToTitleFromTitle(_Focus.day);
-              }
-            case _Focus.month:
-              switch (code) {
-                case <int>[0x1b, 0x5b, 0x41]:
-                  // up
-                  activeMonth -= 1;
-                  titularRefreshCalendar();
-                case <int>[0x1b, 0x5b, 0x42]:
-                  // down
-                  activeMonth += 1;
-                  titularRefreshCalendar();
-                case <int>[0x1b, 0x5b, 0x43]:
-                  // right
-                  moveToTitleFromTitle(_Focus.day);
-                case <int>[0x1b, 0x5b, 0x44]:
-                  // left
-                  moveToTitleFromTitle(_Focus.year);
-              }
-            case _Focus.day:
-              switch (code) {
-                case <int>[0x1b, 0x5b, 0x41]:
-                  // up
-                  activeDay -= 1;
-                  titularRefreshCalendar();
-                case <int>[0x1b, 0x5b, 0x42]:
-                  // down
-                  activeDay += 1;
-                  titularRefreshCalendar();
-                case <int>[0x1b, 0x5b, 0x43]:
-                  // right
-                  moveToTitleFromTitle(_Focus.year);
-                case <int>[0x1b, 0x5b, 0x44]:
-                  // left
-                  moveToTitleFromTitle(_Focus.month);
-              }
-            case _Focus.calendar:
-              switch (code) {
-                case <int>[0x1b, 0x5b, 0x41]:
-                  // up
-                  moveVertical(-1);
-                case <int>[0x1b, 0x5b, 0x42]:
-                  // down
-                  moveVertical(1);
-                case <int>[0x1b, 0x5b, 0x43]:
-                  // right
-                  moveHorizontal(1);
-                case <int>[0x1b, 0x5b, 0x44]:
-                  // left
-                  moveHorizontal(-1);
-              }
-          }
+      displayCalendar();
+
+      stdout.moveUp(calendarHeight - activeY);
+
+      loop:
+      for (List<int> code in stdin.sync) {
+        switch (code) {
+          case <int>[0x3]:
+            throw SignalInterruptionException();
+          case <int>[0x9]:
+            // tab
+            switch (focus) {
+              case _Focus.calendar:
+                moveToTitleFromCalendar(_Focus.year);
+              case _Focus.year:
+                moveToTitleFromTitle(_Focus.month);
+              case _Focus.month:
+                moveToTitleFromTitle(_Focus.day);
+              case _Focus.day:
+                moveToCalendarFromTitle(_Focus.calendar);
+            }
+          case <int>[0x1b, 0x5b, 0x5a]:
+            // shift + tab
+            switch (focus) {
+              case _Focus.calendar:
+                moveToTitleFromCalendar(_Focus.day);
+              case _Focus.day:
+                moveToTitleFromTitle(_Focus.month);
+              case _Focus.month:
+                moveToTitleFromTitle(_Focus.year);
+              case _Focus.year:
+                moveToCalendarFromTitle(_Focus.calendar);
+            }
+          case <int>[0x0d]:
+            // enter
+            active = DateTime(activeYear, activeMonth, activeDay);
+            break loop;
+          case _:
+            void titularRefreshCalendar() {
+              stdout.eraselnDown(calendarHeight + 1 /** Weekday Label */ + 1 /** Title Card */);
+
+              computeActives();
+              displayCalendar();
+
+              stdout.moveUp(calendarHeight + 1 /** Weekday Label */ + 1 /** Title Card */);
+            }
+            switch (focus) {
+              case _Focus.year:
+                switch (code) {
+                  case <int>[0x1b, 0x5b, 0x41]:
+                    // up
+                    activeYear -= 1;
+                    titularRefreshCalendar();
+                  case <int>[0x1b, 0x5b, 0x42]:
+                    // down
+                    activeYear += 1;
+                    titularRefreshCalendar();
+                  case <int>[0x1b, 0x5b, 0x43]:
+                    // right
+                    moveToTitleFromTitle(_Focus.month);
+                  case <int>[0x1b, 0x5b, 0x44]:
+                    // left
+                    moveToTitleFromTitle(_Focus.day);
+                }
+              case _Focus.month:
+                switch (code) {
+                  case <int>[0x1b, 0x5b, 0x41]:
+                    // up
+                    activeMonth -= 1;
+                    titularRefreshCalendar();
+                  case <int>[0x1b, 0x5b, 0x42]:
+                    // down
+                    activeMonth += 1;
+                    titularRefreshCalendar();
+                  case <int>[0x1b, 0x5b, 0x43]:
+                    // right
+                    moveToTitleFromTitle(_Focus.day);
+                  case <int>[0x1b, 0x5b, 0x44]:
+                    // left
+                    moveToTitleFromTitle(_Focus.year);
+                }
+              case _Focus.day:
+                switch (code) {
+                  case <int>[0x1b, 0x5b, 0x41]:
+                    // up
+                    activeDay -= 1;
+                    titularRefreshCalendar();
+                  case <int>[0x1b, 0x5b, 0x42]:
+                    // down
+                    activeDay += 1;
+                    titularRefreshCalendar();
+                  case <int>[0x1b, 0x5b, 0x43]:
+                    // right
+                    moveToTitleFromTitle(_Focus.year);
+                  case <int>[0x1b, 0x5b, 0x44]:
+                    // left
+                    moveToTitleFromTitle(_Focus.month);
+                }
+              case _Focus.calendar:
+                switch (code) {
+                  case <int>[0x1b, 0x5b, 0x41]:
+                    // up
+                    moveVertical(-1);
+                  case <int>[0x1b, 0x5b, 0x42]:
+                    // down
+                    moveVertical(1);
+                  case <int>[0x1b, 0x5b, 0x43]:
+                    // right
+                    moveHorizontal(1);
+                  case <int>[0x1b, 0x5b, 0x44]:
+                    // left
+                    moveHorizontal(-1);
+                }
+            }
+        }
+      }
+
+      /// When the loop is broken, we move downwards.
+      clearScreen();
+
+      if (guard case (GuardFunction<DateTime> fn, String msg) when !fn(active)) {
+        hasFailed = true;
+        stdout.writeln("// $msg".brightRed());
+
+        continue;
+      } else {
+        break;
       }
     }
 
-    /// When the loop is broken, we move downwards.
-    clearScreen();
     stdout.write("+".color(accentColor));
-    stdout.write(" $formattedQuestion ");
-    stdout.write(active.toDateString().color(accentColor));
-    stdout.writeln();
+    stdout.write(" $question ");
+    stdout.writeln(active.toDateString().color(accentColor));
 
     return Success<DateTime>(active);
   } on SignalInterruptionException {
     clearScreen();
 
-    {
-      StringBuffer buffer = StringBuffer()
-        ..write("!".brightRed())
-        ..write(" $formattedQuestion ")
-        ..write("^C".brightBlack());
-
-      stdout.writeln$(buffer);
-    }
+    stdout.write("!".brightRed());
+    stdout.write(" $question ");
+    stdout.writeln("^C".brightBlack());
 
     return const Failure<DateTime>("^C");
   } finally {
@@ -468,9 +482,17 @@ extension PromptDateExtension on BasePrompt {
   Result<DateTime> date(
     String question, {
     DateTime? start,
-    String? example,
+    Guard<DateTime>? guard,
+    String? hint,
     bool minimal = DatePromptDefaults.minimal,
     Color accentColor = DatePromptDefaults.accentColor,
   }) =>
-      datePrompt(question, start: start, accentColor: accentColor);
+      datePrompt(
+        question,
+        start: start,
+        guard: guard,
+        hint: hint,
+        minimal: minimal,
+        accentColor: accentColor,
+      );
 }
