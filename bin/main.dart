@@ -1,7 +1,6 @@
 // ignore_for_file: always_specify_types
 
 import "package:prompt/prompt.dart";
-import 'package:prompt/src/prompt/wip/lines.dart';
 
 enum Month {
   january,
@@ -29,12 +28,12 @@ void main() async {
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }
-  prompt
-      .lines(
-        "Tell us about yourself",
-        guard: Guards.stringIsNotEmpty(),
-      )
-      .nullable();
+  // prompt
+  //     .lines(
+  //       "Tell us about yourself",
+  //       guard: Guards.stringIsNotEmpty(),
+  //     )
+  //     .nullable();
   // prompt.range("An even multiple of 3", step: 3, min: -128, guard: Guards.intIsEven());
   // prompt.int("An odd integer.", guard: Guards.intIsOdd());
   // prompt.double("A double greater than pi.", guard: Guards.numGreaterThan(3.14));
@@ -45,11 +44,16 @@ void main() async {
   //   choices: Month.values,
   //   guard: Guards.notEquals(Month.march),
   // );
-  // prompt.selectMulti(
+  // prompt.select.multi(
   //   "What are your favorite months?",
   //   choices: Month.values,
   //   guard: Guards.contains(Month.march),
   // );
-  // prompt.date("When is your birthday?", start: DateTime(1970, 2, 28));
+  var birthday = prompt
+      .date("When is your birthday?", hint: "The year will be ignored.", guard: Guards.afterNow())
+      .map((value) => value.copyWith(year: 0))
+      .orElse(() => DateTime.now());
+
+  stdout.box(birthday);
   // prompt("A nonempty string", guard: Guards.stringIsNotEmpty());
 }
