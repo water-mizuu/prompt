@@ -1,6 +1,7 @@
 analyzer:
   enable-experiment:
     - inline-class
+    - variance
   language:
     strict-inference: true
     strict-raw-types: true
