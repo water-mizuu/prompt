@@ -99,7 +99,8 @@ Result<int> rangePrompt(
           throw SignalInterruptionException();
 
         case <int>[0x0d]:
-          if (guard case (GuardFunction<int> fn, String message) when !fn(activeValue)) {
+          if (guard case (GuardFunction<int> function, String message)
+              when !function(activeValue)) {
             flagFailure(message);
           } else {
             break loop;

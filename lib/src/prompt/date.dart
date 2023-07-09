@@ -191,10 +191,10 @@ Result<DateTime> datePrompt(
         stdout.eraseln();
         active = DateTime(activeYear, activeMonth, activeDay);
 
-        if (guard case (GuardFunction<DateTime> fn, String msg) when !fn(active)) {
+        if (guard case (GuardFunction<DateTime> function, String message) when !function(active)) {
           hasFailed = true;
 
-          stdout.writeln("// $msg".brightRed());
+          stdout.writeln("// $message".brightRed());
 
           continue;
         } else {
@@ -613,9 +613,9 @@ Result<DateTime> datePrompt(
         eraseScreen();
         active = DateTime(activeYear, activeMonth, activeDay);
 
-        if (guard case (GuardFunction<DateTime> fn, String msg) when !fn(active)) {
+        if (guard case (GuardFunction<DateTime> function, String message) when !function(active)) {
           hasFailed = true;
-          stdout.writeln("// $msg".brightRed());
+          stdout.writeln("// $message".brightRed());
 
           continue;
         } else {

@@ -72,10 +72,9 @@ Result<T> parsedPrompt<T>(
 
       continue;
     }
-    if (guard case (GuardFunction<T> guardFunction, String guardMessage)
-        when !guardFunction(parsed)) {
+    if (guard case (GuardFunction<T> function, String message) when !function(parsed)) {
       resetDisplay();
-      displayFailure(rawInput, guardMessage);
+      displayFailure(rawInput, message);
       hasFailed = true;
 
       continue;

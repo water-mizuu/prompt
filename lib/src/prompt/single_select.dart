@@ -52,6 +52,8 @@ Result<T> singleSelectPrompt<T>(
     index: activeIndex,
     topDistance: intrinsicViewLimit.fdiv(2),
     bottomDistance: intrinsicViewLimit.cdiv(2),
+    topDisparity: 2,
+    bottomDisparity: 2,
   );
 
   String displayItemAt(int index, int viewIndex, {bool colored = true}) {
@@ -242,8 +244,7 @@ Result<T> singleSelectPrompt<T>(
       /// Clear the previous (including the question)
       clearDrawnScreen();
 
-      if (guard case (GuardFunction<T> guardFunction, String message) //
-          when !guardFunction(chosen)) {
+      if (guard case (GuardFunction<T> function, String message) when !function(chosen)) {
         hasFailed = true;
 
         stdout.writeln("// $message".brightRed());

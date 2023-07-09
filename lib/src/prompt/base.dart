@@ -51,7 +51,7 @@ Result<String> basePrompt(
     String input = stdin.readLineSync()?.trim() ?? "";
     stdout.movelnUp(); // Move back to the question line.
 
-    if (guard case (GuardFunction<String> fn, String message) when !fn(input)) {
+    if (guard case (GuardFunction<String> function, String message) when !function(input)) {
       resetDisplay();
       displayFailure(input, message);
       hasFailed = true;

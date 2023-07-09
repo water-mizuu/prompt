@@ -288,8 +288,8 @@ Result<List<T>> multiSelectPrompt<T>(
       /// Display the answer.
       List<T> chosen = <T>[for (int index in chosenIndices) choices[index]];
 
-      if (guard case (GuardFunction<List<T>> fn, String msg) when !fn(chosen)) {
-        stdout.writeln("// $msg".brightRed());
+      if (guard case (GuardFunction<List<T>> function, String message) when !function(chosen)) {
+        stdout.writeln("// $message".brightRed());
         hasFailed = true;
 
         continue failure_loop;
