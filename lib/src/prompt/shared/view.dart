@@ -24,8 +24,8 @@ ViewInfo computeViewInfo(
   int bottomDistance = 2,
 }) {
   int viewLimit = topDistance + bottomDistance + 1;
-  int endOverflow = (index - topDisparity + viewLimit - length).clamp(0, bottomDistance);
-  int viewStart =  (index - topDistance - endOverflow).clamp(0, length - viewLimit);
+  int endOverflow = (index - topDistance + viewLimit - length).clamp(0, bottomDistance);
+  int viewStart = (index - topDistance - endOverflow).clamp(0, length - viewLimit);
   int viewEnd = viewStart + viewLimit;
   int viewIndex = index - viewStart;
 
