@@ -70,6 +70,17 @@ class TermLibWindows implements TermLib {
     _isRaw = false;
 
     SetConsoleMode(_inputHandle, _previousFlags);
+
+    // const int dwMode = ENABLE_ECHO_INPUT &
+    //     ENABLE_EXTENDED_FLAGS &
+    //     ENABLE_INSERT_MODE &
+    //     ENABLE_LINE_INPUT &
+    //     ENABLE_MOUSE_INPUT &
+    //     ENABLE_PROCESSED_INPUT &
+    //     ENABLE_QUICK_EDIT_MODE &
+    //     ENABLE_VIRTUAL_TERMINAL_INPUT;
+    // SetConsoleMode(_inputHandle, dwMode);
+
     SetConsoleMode(_inputHandle, _savedFlags);
   }
 

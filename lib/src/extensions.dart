@@ -221,3 +221,7 @@ extension BigIntExtension<N extends num> on N {
   /// Rounding division
   int rdiv(int right) => (this / right).round();
 }
+
+extension IntegerExtension on int {
+  int max(int right) => this > right ? this : right;
+}

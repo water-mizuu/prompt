@@ -30,6 +30,8 @@ Result<String> linesPrompt(
   }
 
   void tab() {
+    /// This is late because it's possible for y = 0.
+    ///  ∴ We can't use `content[y - 1]` as a default value.
     late int previousIndent = content[y - 1].takeWhile((String c) => c == " ").length - x;
 
     if (y <= 0 || previousIndent <= 0) {
@@ -41,6 +43,7 @@ Result<String> linesPrompt(
     } else {
       stdout.moveRight(previousIndent);
       content[y].insertAll(x, List<String>.filled(previousIndent, " "));
+
       x += previousIndent;
     }
   }
@@ -54,10 +57,8 @@ Result<String> linesPrompt(
 
     if (y > 0) {
       if (content[y - 1].visibleLength case int bottomRowLength when bottomRowLength < x) {
-        int topRowLength = bottomRowLength;
-
-        stdout.moveLeft(x - topRowLength);
-        x = topRowLength;
+        stdout.moveLeft(x - bottomRowLength);
+        x = bottomRowLength;
       }
     }
     y -= 1;
@@ -220,6 +221,7 @@ Result<String> linesPrompt(
 
   bool hasFailed = false;
   try {
+    stdout.push();
     for (;;) {
       {
         StringBuffer buffer = StringBuffer()
@@ -244,10 +246,10 @@ Result<String> linesPrompt(
       loop:
       for (List<int> code in stdin.sync) {
         switch (code) {
-          case <int>[0x4]: // ctrl d
-            break loop;
           case <int>[0x3]: // ctrl c
             throw SignalInterruptionException();
+          case <int>[0x4]: // ctrl d
+            break loop;
 
           case <int>[0x09]: // tab
             tab();
@@ -266,13 +268,6 @@ Result<String> linesPrompt(
             delete();
 
           case <int>[0xd]: // enter
-            // if (y < content.length && content.length > 3) {
-            //   if (content case <List<String>>[..., [], []]) {
-            //     stdout.moveUp(3);
-            //     content.removeRange(content.length - 3, content.length);
-            //     break loop;
-            //   }
-            // }
             enter();
           case <int>[int code]: // any single character
             type(code);
@@ -290,7 +285,7 @@ Result<String> linesPrompt(
       }
       stdout.moveUp(content.length + 1 + increment);
 
-      if (guard case (GuardFunction<String> guard, String message) when !guard(built)) {
+      if (guard case (GuardFunction<String> function, String message) when !function(built)) {
         stdout.eraselnFromCursor();
         stdout.writeln("// $message".brightRed());
         hasFailed = true;
@@ -326,7 +321,9 @@ Result<String> linesPrompt(
     stdout.writeln(buffer);
 
     return const Failure<String>("^C");
-  } finally {}
+  } finally {
+    stdout.pop();
+  }
 }
 
 extension PromptMultiLineExtension on BasePrompt {

@@ -48,8 +48,8 @@ void testView(
     stdout.write(
       "#"
           .brightBlue(iff: index == ind)
-          .brightRed(iff: index - topDisparity <= ind && ind <= index + bottomDisparity)
-          .brightWhite(iff: viewStart <= ind && ind < viewEnd)
+          .brightCyan(iff: index - topDisparity <= ind && ind <= index + bottomDisparity)
+          .italic(iff: viewStart <= ind && ind < viewEnd)
           .brightBlack(iff: viewStart > ind || ind >= viewEnd),
     );
   }
@@ -78,11 +78,6 @@ void testView(
 }
 
 void main() async {
-  int count = 48;
-  for (int i = 0; i < count; ++i) {
-    testView(count, index: i, bottomDistance: 3, bottomDisparity: 2);
-  }
-
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }
@@ -93,20 +88,20 @@ void main() async {
   //     )
   //     .nullable();
   // prompt.range("An even multiple of 3", step: 3, min: -128, guard: Guards.intIsEven());
-  // prompt.int("An odd integer.", guard: Guards.intIsOdd());
   // prompt.double("A double greater than pi.", guard: Guards.numGreaterThan(3.14));
   // prompt.bigInt("A large integer", guard: Guards.greaterThan(200.n));
   // prompt.bool("Do you agree?".doubleUnderline());
-  // prompt.select(
-  //   "Which is your most favorite?",
+    // prompt.select(
+    //   "Which is your most favorite?",
+    //   choices: Month.values,
+    //   guard: Guards.notEquals(Month.march),
+    // );
+  // prompt.select.multi(
+  //   "What are your favorite months?",
   //   choices: Month.values,
-  //   guard: Guards.notEquals(Month.march),
+  //   guard: Guards.contains(Month.march),
   // );
-  prompt.select.multi(
-    "What are your favorite months?",
-    choices: Month.values,
-    guard: Guards.contains(Month.march),
-  );
+  // prompt.int("An odd integer.", guard: Guards.intIsOdd());
   // var birthday = prompt
   //     .date(
   //       "When is your birthday?",
