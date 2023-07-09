@@ -2,6 +2,7 @@ import "dart:math" as math;
 
 import "package:prompt/prompt.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/prompt/shared/view.dart";
 
 abstract final class SingleSelectPromptDefaults {
   static const int start = 0;
@@ -25,35 +26,33 @@ Result<T> singleSelectPrompt<T>(
 
   int activeIndex = start;
   T chosen = choices[activeIndex];
-
-  int viewLimit = <int>{
+  int intrinsicViewLimit = <int>{
     view,
     choices.length,
-    if (stdout.hasTerminal) stdout.terminalLines - stdout.cursor.line - 2,
-  }.reduce(math.min);
-  int disparity = 1;
+    if (stdout.hasTerminal) stdout.terminalLines - 1 /** Question */ - 2,
+  }.map((int v) => v - 1).reduce(math.min);
 
-  bool viewStartingAtActiveIndexExceedsLength =
-      activeIndex - disparity + viewLimit > choices.length;
+  var ViewInfo(
+    /// The actual index where the view starts.
+    :int viewStart,
 
-  bool viewExceedsZero = activeIndex - disparity >= 0;
+    /// The index of the item in the view.
+    :int viewIndex,
 
-  /// The actual index where the view starts.
-  int viewStart;
+    /// The *preferred* distance of the active item from the top of the view.
+    :int topDisparity,
 
-  /// The index of the item in the view.
-  int viewIndex;
+    /// The *preferred* distance of the active item from the bottom of the view.
+    :int bottomDisparity,
 
-  if (viewStartingAtActiveIndexExceedsLength) {
-    viewStart = choices.length - viewLimit;
-    viewIndex = activeIndex - choices.length + viewLimit;
-  } else if (viewExceedsZero) {
-    viewStart = activeIndex - disparity;
-    viewIndex = disparity;
-  } else {
-    viewStart = 0;
-    viewIndex = activeIndex;
-  }
+    /// The size of the view.
+    :int viewLimit,
+  ) = computeViewInfo(
+    choices.length,
+    index: activeIndex,
+    topDistance: intrinsicViewLimit.fdiv(2),
+    bottomDistance: intrinsicViewLimit.cdiv(2),
+  );
 
   String displayItemAt(int index, int viewIndex, {bool colored = true}) {
     const ({String active, String bottom, String inactive, String top}) displays = (
@@ -101,8 +100,8 @@ Result<T> singleSelectPrompt<T>(
     if (activeIndex > 0) {
       --activeIndex;
 
-      if ((viewIndex - disparity > 0) || //
-          (activeIndex - disparity < 0)) {
+      if ((viewIndex - topDisparity > 0) || //
+          (activeIndex - topDisparity < 0)) {
         --viewIndex;
         stdout.moveUp();
 
@@ -146,8 +145,8 @@ Result<T> singleSelectPrompt<T>(
     if (activeIndex < choices.length - 1) {
       ++activeIndex;
 
-      if ((viewIndex + disparity < viewLimit - 1) || //
-          (activeIndex + disparity > choices.length - 1)) {
+      if ((viewIndex + bottomDisparity < viewLimit - 1) || //
+          (activeIndex + bottomDisparity > choices.length - 1)) {
         ++viewIndex;
         stdout.moveDown();
         return;

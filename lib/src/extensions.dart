@@ -197,12 +197,27 @@ extension DateExtension on DateTime {
 
     return "$h:$m:$s";
   }
+
+  DateTime minimalDate() => copyWith(
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+        microsecond: 0,
+      );
+
+  int get dayCount => DateTime(year, month + 1, 0).day;
 }
 
 extension BigIntExtension<N extends num> on N {
   BigInt get n => BigInt.from(this);
-}
 
-extension DateTimeExtension on DateTime {
-  int get dayCount => DateTime(year, month + 1, 0).day;
+  /// Floor division
+  int fdiv(int right) => (this / right).floor();
+
+  /// Ceiling division
+  int cdiv(int right) => (this / right).ceil();
+
+  /// Rounding division
+  int rdiv(int right) => (this / right).round();
 }

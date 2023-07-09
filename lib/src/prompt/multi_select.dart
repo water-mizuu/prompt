@@ -2,6 +2,7 @@ import "dart:math" as math;
 
 import "package:prompt/prompt.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/prompt/shared/view.dart";
 
 abstract final class MultiSelectPromptDefaults {
   static const int start = 0;
@@ -33,32 +34,34 @@ Result<List<T>> multiSelectPrompt<T>(
   assert(view > 0, "view must be greater than 0.");
 
   int activeIndex = start;
-
   Set<int> chosenIndices = <int>{};
-
-  int viewLimit = <int>{
+  int intrinsicViewLimit = <int>{
     view,
     choices.length,
-    if (stdout.hasTerminal) stdout.terminalLines - stdout.cursor.line - 2,
-  }.reduce(math.min);
-  int disparity = 1;
+    if (stdout.hasTerminal) stdout.terminalLines - 1 /** Question */ - 2,
+  }.map((int v) => v - 1).reduce(math.min);
 
-  /// The actual index where the view starts.
-  int viewStart;
+  var ViewInfo(
+    /// The actual index where the view starts.
+    :int viewStart,
 
-  /// The index of the item in the view.
-  int viewIndex;
+    /// The index of the item in the view.
+    :int viewIndex,
 
-  if (activeIndex - disparity > choices.length - viewLimit) {
-    viewStart = choices.length - viewLimit;
-    viewIndex = activeIndex - choices.length + viewLimit;
-  } else if (activeIndex - disparity >= 0) {
-    viewStart = activeIndex - disparity;
-    viewIndex = disparity;
-  } else {
-    viewStart = 0;
-    viewIndex = activeIndex;
-  }
+    /// The *preferred* distance of the active item from the top of the view.
+    :int topDisparity,
+
+    /// The *preferred* distance of the active item from the bottom of the view.
+    :int bottomDisparity,
+
+    /// The size of the view.
+    :int viewLimit,
+  ) = computeViewInfo(
+    choices.length,
+    index: activeIndex,
+    topDistance: intrinsicViewLimit.fdiv(2),
+    bottomDistance: intrinsicViewLimit.cdiv(2),
+  );
 
   String displayItemAt(int index, int viewIndex, {bool isActiveColorDisabled = false}) {
     const ({String active, String bottom, String inactive, String top}) displays = (
@@ -121,8 +124,8 @@ Result<List<T>> multiSelectPrompt<T>(
     if (activeIndex > 0) {
       --activeIndex;
 
-      if ((viewIndex - disparity > 0) || //
-          (activeIndex - disparity < 0)) {
+      if ((viewIndex - topDisparity > 0) || //
+          (activeIndex - topDisparity < 0)) {
         --viewIndex;
         stdout.moveUp();
 
@@ -166,8 +169,8 @@ Result<List<T>> multiSelectPrompt<T>(
     if (activeIndex < choices.length - 1) {
       ++activeIndex;
 
-      if ((viewIndex + disparity < viewLimit - 1) || //
-          (activeIndex + disparity > choices.length - 1)) {
+      if ((viewIndex + bottomDisparity < viewLimit - 1) || //
+          (activeIndex + bottomDisparity > choices.length - 1)) {
         ++viewIndex;
         stdout.moveDown();
         return;

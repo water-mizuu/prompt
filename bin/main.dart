@@ -1,6 +1,5 @@
-// ignore_for_file: always_specify_types
-
 import "package:prompt/prompt.dart";
+import "package:prompt/src/prompt/shared/view.dart";
 
 enum Month {
   january,
@@ -24,7 +23,66 @@ enum Month {
   }
 }
 
+void testView(
+  int length, {
+  required int index,
+  int topDisparity = 1,
+  int bottomDisparity = 1,
+  int topDistance = 2,
+  int bottomDistance = 2,
+}) {
+  var ViewInfo(
+    :int viewLimit,
+    :int endOverflow,
+    :int viewStart,
+    :int viewEnd,
+    :int viewIndex,
+  ) = computeViewInfo(
+    length,
+    index: index,
+    topDistance: topDistance,
+    bottomDistance: bottomDistance,
+  );
+
+  for (int ind in List<int>.generate(length, (int i) => i)) {
+    stdout.write(
+      "#"
+          .brightBlue(iff: index == ind)
+          .brightRed(iff: index - topDisparity <= ind && ind <= index + bottomDisparity)
+          .brightWhite(iff: viewStart <= ind && ind < viewEnd)
+          .brightBlack(iff: viewStart > ind || ind >= viewEnd),
+    );
+  }
+  stdout.writeln();
+
+  for (int i = 0; i < viewStart; ++i) {
+    stdout.write(" ");
+  }
+  stdout.write("+");
+  for (int i = viewStart + 1; i < viewEnd - 1; ++i) {
+    stdout.write("-");
+  }
+  stdout.write("+");
+  stdout.writeln();
+
+  stdout.writeln(
+    (
+      index: index,
+      viewLimit: viewLimit,
+      endOverflow: endOverflow,
+      viewIndex: viewIndex,
+      viewStart: viewStart,
+      viewEnd: viewEnd,
+    ).toString().brightBlack(),
+  );
+}
+
 void main() async {
+  int count = 48;
+  for (int i = 0; i < count; ++i) {
+    testView(count, index: i, bottomDistance: 3, bottomDisparity: 2);
+  }
+
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }
@@ -44,16 +102,21 @@ void main() async {
   //   choices: Month.values,
   //   guard: Guards.notEquals(Month.march),
   // );
-  // prompt.select.multi(
-  //   "What are your favorite months?",
-  //   choices: Month.values,
-  //   guard: Guards.contains(Month.march),
-  // );
-  var birthday = prompt
-      .date("When is your birthday?", hint: "The year will be ignored.", guard: Guards.afterNow())
-      .map((value) => value.copyWith(year: 0))
-      .orElse(() => DateTime.now());
+  prompt.select.multi(
+    "What are your favorite months?",
+    choices: Month.values,
+    guard: Guards.contains(Month.march),
+  );
+  // var birthday = prompt
+  //     .date(
+  //       "When is your birthday?",
+  //       hint: "The year will be ignored.",
+  //       guard: Guards.beforeNow(),
+  //       minimal: true,
+  //     )
+  //     .map((value) => value.copyWith(year: 0))
+  //     .orElse(() => DateTime.now());
 
-  stdout.box(birthday);
+  // stdout.box(birthday);
   // prompt("A nonempty string", guard: Guards.stringIsNotEmpty());
 }

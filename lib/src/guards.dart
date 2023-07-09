@@ -1,4 +1,4 @@
-import "package:prompt/src/types.dart";
+import "package:prompt/prompt.dart";
 
 abstract final class Guards {
   // Number guards
@@ -85,19 +85,21 @@ abstract final class Guards {
         "Must be after or on $value!",
       );
 
-  static Guard<DateTime> beforeNow() =>
-      ((DateTime v) => v.isBefore(DateTime.now()), "Must be before today!");
+  static Guard<DateTime> beforeNow() => (
+        (DateTime v) => v.isBefore(DateTime.now().minimalDate().minimalDate()),
+        "Must be before today!"
+      );
 
   static Guard<DateTime> afterNow() =>
-      ((DateTime v) => v.isAfter(DateTime.now()), "Must be after today!");
+      ((DateTime v) => v.isAfter(DateTime.now().minimalDate()), "Must be after today!");
 
   static Guard<DateTime> beforeOrOnNow() => (
-        (DateTime v) => v.isBefore(DateTime.now().add(const Duration(days: 1))),
+        (DateTime v) => v.isBefore(DateTime.now().minimalDate().add(const Duration(days: 1))),
         "Must be today or before today!"
       );
 
   static Guard<DateTime> afterOrOnNow() => (
-        (DateTime v) => v.isAfter(DateTime.now().subtract(const Duration(days: 1))),
+        (DateTime v) => v.isAfter(DateTime.now().minimalDate().subtract(const Duration(days: 1))),
         "Must be today or after today!"
       );
 }
