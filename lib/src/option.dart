@@ -1,7 +1,7 @@
 import "package:prompt/src/io/error.dart";
 import "package:prompt/src/types.dart";
 
-sealed class Option<inout T> {
+sealed class Option<T> {
   const Option();
   const factory Option.success(T value) = Success<T>;
   const factory Option.failure(String failure) = Failure<T>;
@@ -18,7 +18,7 @@ sealed class Option<inout T> {
   T? nullable();
 }
 
-final class Failure<inout T> implements Option<T> {
+final class Failure<T> implements Option<T> {
   const Failure(this.failure);
 
   @override
@@ -50,7 +50,7 @@ final class Failure<inout T> implements Option<T> {
       );
 }
 
-final class Success<inout T> implements Option<T> {
+final class Success<T> implements Option<T> {
   const Success(this.value);
 
   @override
