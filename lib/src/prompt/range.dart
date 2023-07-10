@@ -24,6 +24,7 @@ abstract final class RangePromptDefaults {
 Result<int> rangePrompt(
   String question, {
   Guard<int>? guard,
+  String? hint,
   int min = RangePromptDefaults.min,
   int max = RangePromptDefaults.max,
   int step = RangePromptDefaults.step,
@@ -83,6 +84,9 @@ Result<int> rangePrompt(
     stdout.hideCursor();
     stdout.write("?".color(accentColor));
     stdout.write(" $question ");
+    if (hint != null) {
+      stdout.write("($hint) ".brightBlack());
+    }
     stdout.write("[$min, $max]".brightBlack());
     stdout.write(" $activeValue ".color(accentColor));
     stdout.write("// Arrow keys to change".brightBlack());
