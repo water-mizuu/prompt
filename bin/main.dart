@@ -79,7 +79,7 @@ void testView(
 }
 
 void main() async {
-  filePrompt("Select a folder");
+  directoryPrompt("Select a directory to create the project in.");
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }

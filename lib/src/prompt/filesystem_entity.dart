@@ -5,6 +5,7 @@ import "dart:math" as math;
 import "package:prompt/src/extensions.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
 import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
@@ -278,6 +279,9 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   }
 
   try {
+    stdout.push();
+    stdout.hideCursor();
+
     update();
 
     FileSystemEntity chosenEntity;
@@ -327,11 +331,19 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
     }
     stdout.write("+".color(accentColor));
     stdout.write(" $question ");
-    stdout.write(chosenEntity.path.color(accentColor));
-    stdout.writeln();
+    stdout.writeln(chosenEntity.path.color(accentColor));
 
     return Success<FileSystemEntity>(chosenEntity);
-  } finally {}
+  } on SignalInterruptionException {
+    erase();
+    stdout.write("!".brightRed());
+    stdout.write(" $question ");
+    stdout.writeln("^C".brightBlack());
+
+    return const Failure<FileSystemEntity>("^C");
+  } finally {
+    stdout.pop();
+  }
 }
 
 Option<File> filePrompt(
@@ -364,7 +376,7 @@ Option<Directory> directoryPrompt(
       start: start,
       guard: (
         (FileSystemEntity entity) => entity is Directory && (guard?.$1(entity) ?? true),
-        guard?.$2 ?? "Must be a file."
+        guard?.$2 ?? "Must be a directory."
       ),
       hint: hint,
       accentColor: accentColor,
