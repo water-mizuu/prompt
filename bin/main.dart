@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:prompt/prompt.dart";
 import "package:prompt/src/prompt/filesystem_entity.dart";
 import "package:prompt/src/prompt/shared/view.dart";
@@ -78,7 +80,15 @@ void testView(
   );
 }
 
+int? compute() => switch (Random().nextDouble()) {
+      > 0.5 => 1,
+      _ => null,
+    };
+
 void main() async {
+  int? value = compute();
+  var v = value.map((int c) => c + 1);
+  stdout.box(v);
   prompt.directory(
     "Select a directory to create the project in.",
     guard: Guard<Directory>.unit(

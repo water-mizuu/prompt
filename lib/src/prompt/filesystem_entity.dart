@@ -6,6 +6,7 @@ import "package:prompt/src/extensions.dart";
 import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/io/stdio/block/stdout/context.dart";
 import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
 import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdin.dart";
@@ -83,8 +84,7 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
           // And finally files.
           (File(), Directory()) => 1,
           // If the types are equal, then we compare their name alphabetically.
-          (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) =>
-            left.compareTo(right),
+          (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) => left.compareTo(right),
         },
       );
 
@@ -119,18 +119,18 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
       stdout.write("($hint) ");
     }
 
-    stdout.push();
-    stdout.foregroundColor = Colors.brightBlack;
-    switch (children[activeIndex]) {
-      case GhostDirectory _:
-        stdout.write(activeDirectory.parent.path);
-        stdout.write(Platform.pathSeparator);
-      case FileSystemEntity _:
-        stdout.write(activeDirectory.path);
-        stdout.write(Platform.pathSeparator);
-        stdout.write(children[activeIndex].name);
-    }
-    stdout.pop();
+    stdout.context(() {
+      stdout.foregroundColor = Colors.brightBlack;
+      switch (children[activeIndex]) {
+        case GhostDirectory _:
+          stdout.write(activeDirectory.parent.compactPath);
+          stdout.write(Platform.pathSeparator);
+        case FileSystemEntity _:
+          stdout.write(activeDirectory.compactPath);
+          stdout.write(Platform.pathSeparator);
+          stdout.write(children[activeIndex].name);
+      }
+    });
   }
 
   void draw() {
@@ -261,6 +261,9 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   }
 
   void moveBack() {
+    if (indexHistory.isEmpty) {
+      indexHistory.addLast(0);
+    }
     activeDirectory = activeDirectory.parent;
     erase();
     update(indexHistory.removeLast());
@@ -452,8 +455,7 @@ final class GhostDirectory implements Directory {
   Stream<FileSystemEntity> list({bool recursive = false, bool followLinks = true}) async* {}
 
   @override
-  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) =>
-      <FileSystemEntity>[];
+  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) => <FileSystemEntity>[];
 
   @override
   Directory get parent {

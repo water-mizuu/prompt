@@ -138,7 +138,7 @@ abstract final class Guards {
       ).toGuard();
 
   static Guard<C> greaterThanEquals<C extends Comparable<C>>(C value) => (
-        (C v) => v.compareTo(value) >= 0,
+      (C v) => v.compareTo(value) >= 0,
         "Must be greater than $value!",
       ).toGuard();
 

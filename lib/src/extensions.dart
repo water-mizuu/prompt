@@ -24,8 +24,7 @@ extension StringExtension on String {
     List<String> buffer = <String>[];
 
     for (String word in words) {
-      if (buffer.join(" ") case String temp
-          when buffer.isNotEmpty && temp.length + word.length >= columns) {
+      if (buffer.join(" ") case String temp when buffer.isNotEmpty && temp.length + word.length >= columns) {
         lines.add(temp);
         buffer.clear();
       }
@@ -150,14 +149,12 @@ extension PredicateExtension<T> on Predicate<T> {
 
 extension NullableFunctionalExtension<T> on T? {
   O? map<O>(O Function(T value) mapper) => switch (this) { T value => mapper(value), _ => null };
-  T? where(bool Function(T value) predicate) =>
-      switch (this) { T value when predicate(value) => value, _ => null };
+  T? where(bool Function(T value) predicate) => switch (this) { T value when predicate(value) => value, _ => null };
 }
 
-extension NonNullableFunctionalExtension<T> on T {
+extension NonNullableFunctionalExtension<T extends Object> on T {
   O map<O>(O Function(T value) mapper) => mapper(this);
-  T? where(bool Function(T value) predicate) =>
-      switch (this) { T value when predicate(value) => value, _ => null };
+  T? where(bool Function(T value) predicate) => switch (this) { T value when predicate(value) => value, _ => null };
 }
 
 extension ListExtensionMethods<E> on List<E> {
@@ -229,4 +226,8 @@ extension IntegerExtension on int {
 
 extension FileSystemEntityExtension on FileSystemEntity {
   String get name => path.split(Platform.pathSeparator).last;
+  String get compactPath => path
+      .split(Platform.pathSeparator)
+      .map((String v) => v.substring(0, math.min(2, v.length)))
+      .join(Platform.pathSeparator);
 }
