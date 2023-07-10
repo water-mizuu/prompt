@@ -56,7 +56,7 @@ Result<T> singleSelectPrompt<T>(
     bottomDisparity: 2,
   );
 
-  String displayItemAt(int index, int viewIndex, {bool colored = true}) {
+  void displayItemAt(int index, int viewIndex, {bool colored = true}) {
     const ({String active, String bottom, String inactive, String top}) displays = (
       top: "-",
       bottom: "-", // "∨"
@@ -64,37 +64,34 @@ Result<T> singleSelectPrompt<T>(
       inactive: " ",
     );
 
-    StringBuffer buffer = StringBuffer();
     T option = choices[index];
 
     late bool isNonFirstTopEdge = viewIndex == 0 && index > 0;
     late bool isNonLastBottomEdge = viewIndex == viewLimit - 1 && index < choices.length - 1;
     late bool isActive = colored && index == activeIndex;
     if (isActive) {
-      buffer.write(accentColor(displays.active));
+      stdout.write(accentColor(displays.active));
     } else if (isNonFirstTopEdge) {
-      buffer.write(displays.top.brightBlack());
+      stdout.write(displays.top.brightBlack());
     } else if (isNonLastBottomEdge) {
-      buffer.write(displays.bottom.brightBlack());
+      stdout.write(displays.bottom.brightBlack());
     } else {
-      buffer.write(displays.inactive);
+      stdout.write(displays.inactive);
     }
 
-    buffer.write(" ");
-    buffer.write("$option".color(accentColor, iff: isActive));
-
-    return buffer.toString();
+    stdout.write(" ");
+    stdout.write("$option".color(accentColor, iff: isActive));
   }
 
   void move(void Function() body) {
     stdout.eraseln();
-    stdout.write(displayItemAt(activeIndex, viewIndex, colored: false));
+    displayItemAt(activeIndex, viewIndex, colored: false);
 
     /// This looks weird, but [body()] is expected to mutate
     ///   [activeIndex] and [viewIndex]
     body();
     stdout.eraseln();
-    stdout.write(displayItemAt(activeIndex, viewIndex));
+    displayItemAt(activeIndex, viewIndex);
     stdout.movelnStart();
   }
 
@@ -119,7 +116,7 @@ Result<T> singleSelectPrompt<T>(
 
         stdout.moveUp();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the top,
@@ -133,7 +130,7 @@ Result<T> singleSelectPrompt<T>(
 
         stdout.moveDown();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the bottom,
@@ -163,7 +160,7 @@ Result<T> singleSelectPrompt<T>(
 
         stdout.moveDown();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the bottom,
@@ -177,7 +174,7 @@ Result<T> singleSelectPrompt<T>(
 
         stdout.moveUp();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the top,
@@ -217,7 +214,8 @@ Result<T> singleSelectPrompt<T>(
       stdout.writeln();
 
       for (var (int vi, (int i, _)) in choices.indexed.skip(viewStart).take(viewLimit).indexed) {
-        stdout.writeln(displayItemAt(i, vi));
+        displayItemAt(i, vi);
+        stdout.writeln();
       }
 
       /// Choose the active option

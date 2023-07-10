@@ -9,8 +9,6 @@ abstract final class MultiSelectPromptDefaults {
   static const int view = 6;
   static const int min = 0;
 
-  static const String hint = "";
-
   static const Color accentColor = Colors.brightBlue;
 }
 
@@ -23,7 +21,7 @@ Result<List<T>> multiSelectPrompt<T>(
   String question, {
   required List<T> choices,
   Guard<List<T>>? guard,
-  String hint = MultiSelectPromptDefaults.hint,
+  String? hint,
   int start = MultiSelectPromptDefaults.start,
   int view = MultiSelectPromptDefaults.view,
   int min = MultiSelectPromptDefaults.min,
@@ -63,7 +61,7 @@ Result<List<T>> multiSelectPrompt<T>(
     bottomDistance: intrinsicViewLimit.cdiv(2),
   );
 
-  String displayItemAt(int index, int viewIndex, {bool isActiveColorDisabled = false}) {
+  void displayItemAt(int index, int viewIndex, {bool isActiveColorDisabled = false}) {
     const ({String active, String bottom, String inactive, String top}) displays = (
       top: "-", // "∧"
       bottom: "-", // "∨"
@@ -71,7 +69,6 @@ Result<List<T>> multiSelectPrompt<T>(
       inactive: " ",
     );
 
-    StringBuffer buffer = StringBuffer();
     T option = choices[index];
 
     late bool isNonFirstTopEdge = viewIndex <= 0 && index > 0;
@@ -80,43 +77,41 @@ Result<List<T>> multiSelectPrompt<T>(
     late bool isChosen = chosenIndices.contains(index);
 
     if (isActive) {
-      buffer.write(displays.active.color(accentColor));
+      stdout.write(displays.active.color(accentColor));
     } else if (isNonFirstTopEdge) {
-      buffer.write(displays.top.brightBlack());
+      stdout.write(displays.top.brightBlack());
     } else if (isNonLastBottomEdge) {
-      buffer.write(displays.bottom.brightBlack());
+      stdout.write(displays.bottom.brightBlack());
     } else {
-      buffer.write(displays.inactive);
+      stdout.write(displays.inactive);
     }
 
-    buffer.write(" ");
+    stdout.write(" ");
 
     if (isChosen) {
-      buffer.write(MultiSelectPromptSettings.selectedMarker.color(accentColor));
+      stdout.write(MultiSelectPromptSettings.selectedMarker.color(accentColor));
     } else {
-      buffer.write(MultiSelectPromptSettings.unselectedMarker);
+      stdout.write(MultiSelectPromptSettings.unselectedMarker);
     }
 
-    buffer.write(" ");
+    stdout.write(" ");
 
     if (isActive) {
-      buffer.write("$option".color(accentColor));
+      stdout.write("$option".color(accentColor));
     } else {
-      buffer.write(option);
+      stdout.write(option);
     }
-
-    return buffer.toString();
   }
 
   void move(void Function() body) {
     stdout.eraseln();
-    stdout.write(displayItemAt(activeIndex, viewIndex, isActiveColorDisabled: true));
+    displayItemAt(activeIndex, viewIndex, isActiveColorDisabled: true);
 
     /// This looks weird, but [body()] is expected to mutate
     ///   [activeIndex] and [viewIndex]
     body();
     stdout.eraseln();
-    stdout.write(displayItemAt(activeIndex, viewIndex));
+    displayItemAt(activeIndex, viewIndex);
     stdout.movelnStart();
   }
 
@@ -141,7 +136,7 @@ Result<List<T>> multiSelectPrompt<T>(
 
         stdout.moveUp();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the top,
@@ -155,7 +150,7 @@ Result<List<T>> multiSelectPrompt<T>(
 
         stdout.moveDown();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the bottom,
@@ -185,7 +180,7 @@ Result<List<T>> multiSelectPrompt<T>(
 
         stdout.moveDown();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the bottom,
@@ -199,7 +194,7 @@ Result<List<T>> multiSelectPrompt<T>(
 
         stdout.moveUp();
         stdout.eraseln();
-        stdout.write(displayItemAt(i, vi));
+        displayItemAt(i, vi);
       }
 
       /// Now that the cursor is at the top,
@@ -234,14 +229,15 @@ Result<List<T>> multiSelectPrompt<T>(
       }
       stdout.space();
       stdout.write(question);
-      if (hint.isNotEmpty) {
+      if (hint != null) {
         stdout.space();
         stdout.write("($hint)".brightBlack());
       }
       stdout.writeln();
 
       for (var (int vi, (int i, _)) in choices.indexed.skip(viewStart).take(viewLimit).indexed) {
-        stdout.writeln(displayItemAt(i, vi));
+        displayItemAt(i, vi);
+        stdout.writeln();
       }
 
       /// Choose the active option
@@ -261,7 +257,7 @@ Result<List<T>> multiSelectPrompt<T>(
             }
 
             stdout.eraseln();
-            stdout.write(displayItemAt(activeIndex, viewIndex));
+            displayItemAt(activeIndex, viewIndex);
 
           case <int>[0x0d]:
             break key_loop;
@@ -330,7 +326,7 @@ extension PromptMultiSelectExtension on BasePrompt {
     String question, {
     required List<T> choices,
     Guard<List<T>>? guard,
-    String hint = MultiSelectPromptDefaults.hint,
+    String? hint,
     int start = MultiSelectPromptDefaults.start,
     int view = MultiSelectPromptDefaults.view,
     int min = MultiSelectPromptDefaults.min,
@@ -354,7 +350,7 @@ extension SingleSelectPromptMultiSelectExtension on SingleSelectPrompt {
     String question, {
     required List<T> choices,
     Guard<List<T>>? guard,
-    String hint = MultiSelectPromptDefaults.hint,
+    String? hint,
     int start = MultiSelectPromptDefaults.start,
     int view = MultiSelectPromptDefaults.view,
     int min = MultiSelectPromptDefaults.min,
