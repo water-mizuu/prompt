@@ -8,8 +8,8 @@ import "package:prompt/src/io/stdio/wrapper/stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
 import "package:prompt/src/prompt/base.dart";
-import "package:prompt/src/result.dart";
 import "package:prompt/src/types.dart";
 
 abstract final class DatePromptDefaults {
@@ -24,7 +24,7 @@ enum _Focus {
   calendar;
 }
 
-Result<DateTime> datePrompt(
+Option<DateTime> datePrompt(
   String question, {
   DateTime? start,
   Guard<DateTime>? guard,
@@ -643,7 +643,7 @@ Result<DateTime> datePrompt(
 }
 
 extension PromptDateExtension on BasePrompt {
-  Result<DateTime> date(
+  Option<DateTime> date(
     String question, {
     DateTime? start,
     Guard<DateTime>? guard,

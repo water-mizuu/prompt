@@ -8,8 +8,8 @@ import "package:prompt/src/io/stdio/wrapper/stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
 import "package:prompt/src/prompt/base.dart";
-import "package:prompt/src/result.dart";
 import "package:prompt/src/types.dart";
 
 abstract final class RangePromptDefaults {
@@ -21,7 +21,7 @@ abstract final class RangePromptDefaults {
   static const Color accentColor = Colors.brightBlue;
 }
 
-Result<int> rangePrompt(
+Option<int> rangePrompt(
   String question, {
   Guard<int>? guard,
   String? hint,
@@ -132,7 +132,7 @@ Result<int> rangePrompt(
 }
 
 extension PromptRangeExtension on BasePrompt {
-  Result<int> range(
+  Option<int> range(
     String question, {
     Guard<int>? guard,
     int min = RangePromptDefaults.min,

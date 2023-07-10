@@ -1,24 +1,24 @@
 import "package:prompt/src/io/error.dart";
 import "package:prompt/src/types.dart";
 
-sealed class Result<inout T> {
-  const Result();
-  const factory Result.success(T value) = Success<T>;
-  const factory Result.failure(String failure) = Failure<T>;
+sealed class Option<inout T> {
+  const Option();
+  const factory Option.success(T value) = Success<T>;
+  const factory Option.failure(String failure) = Failure<T>;
 
   abstract final T value;
   abstract final String failure;
 
   T orElse(T Function() orElse);
-  Result<O> map<O>(O Function(T value) callback);
-  Result<O> expand<O>(Result<O> Function(T value) callback);
-  Result<T> where(Predicate<T> predicate);
+  Option<O> map<O>(O Function(T value) callback);
+  Option<O> expand<O>(Option<O> Function(T value) callback);
+  Option<T> where(Predicate<T> predicate);
 
   T unwrap();
   T? nullable();
 }
 
-final class Failure<inout T> implements Result<T> {
+final class Failure<inout T> implements Option<T> {
   const Failure(this.failure);
 
   @override
@@ -34,7 +34,7 @@ final class Failure<inout T> implements Result<T> {
   Failure<O> map<O>(O Function(T) callback) => Failure<O>(failure);
 
   @override
-  Failure<O> expand<O>(Result<O> Function(T) callback) => Failure<O>(failure);
+  Failure<O> expand<O>(Option<O> Function(T) callback) => Failure<O>(failure);
 
   @override
   Failure<T> where(Predicate<T> callback) => this;
@@ -50,7 +50,7 @@ final class Failure<inout T> implements Result<T> {
       );
 }
 
-final class Success<inout T> implements Result<T> {
+final class Success<inout T> implements Option<T> {
   const Success(this.value);
 
   @override
@@ -66,10 +66,10 @@ final class Success<inout T> implements Result<T> {
   Success<O> map<O>(O Function(T) callback) => Success<O>(callback(value));
 
   @override
-  Result<O> expand<O>(Result<O> Function(T) callback) => callback(value);
+  Option<O> expand<O>(Option<O> Function(T) callback) => callback(value);
 
   @override
-  Result<T> where(Predicate<T> callback, [String message = "Filter failure"]) =>
+  Option<T> where(Predicate<T> callback, [String message = "Filter failure"]) =>
       callback(value) ? this : Failure<T>(message);
 
   @override
@@ -79,7 +79,7 @@ final class Success<inout T> implements Result<T> {
   T unwrap() => value;
 }
 
-extension FutureFailureOrMethods<E> on Future<Result<E>> {
-  Future<E> unwrap() => then((Result<E> result) => result.unwrap());
-  Future<E?> unwrapNullable() => then((Result<E> result) => result.nullable());
+extension FutureFailureOrMethods<E> on Future<Option<E>> {
+  Future<E> unwrap() => then((Option<E> result) => result.unwrap());
+  Future<E?> unwrapNullable() => then((Option<E> result) => result.nullable());
 }

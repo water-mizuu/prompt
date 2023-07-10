@@ -11,7 +11,7 @@ abstract final class SingleSelectPromptDefaults {
   static const Color accentColor = Colors.brightBlue;
 }
 
-Result<T> singleSelectPrompt<T>(
+Option<T> singleSelectPrompt<T>(
   String question, {
   required List<T> choices,
   Guard<T>? guard,
@@ -272,7 +272,7 @@ Result<T> singleSelectPrompt<T>(
 
 extension PromptSingleSelectionExtension on BasePrompt {
   /// Prompt the user to choose from a list of options.
-  Result<T> select<T>(
+  Option<T> select<T>(
     String question, {
     required List<T> choices,
     Guard<T>? guard,
@@ -292,7 +292,7 @@ extension PromptSingleSelectionExtension on BasePrompt {
       );
 }
 
-typedef SingleSelectPrompt = Result<O> Function<O>(
+typedef SingleSelectPrompt = Option<O> Function<O>(
   String question, {
   required List<O> choices,
   Guard<O>? guard,

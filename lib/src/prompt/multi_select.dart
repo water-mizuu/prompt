@@ -17,7 +17,7 @@ abstract final class MultiSelectPromptSettings {
   static String unselectedMarker = "[ ]";
 }
 
-Result<List<T>> multiSelectPrompt<T>(
+Option<List<T>> multiSelectPrompt<T>(
   String question, {
   required List<T> choices,
   Guard<List<T>>? guard,
@@ -235,7 +235,11 @@ Result<List<T>> multiSelectPrompt<T>(
       }
       stdout.writeln();
 
-      for (var (int vi, (int i, _)) in choices.indexed.skip(viewStart).take(viewLimit).indexed) {
+      for (var (int vi, (int i, _)) in choices //
+          .indexed
+          .skip(viewStart)
+          .take(viewLimit)
+          .indexed) {
         displayItemAt(i, vi);
         stdout.writeln();
       }
@@ -322,7 +326,7 @@ Result<List<T>> multiSelectPrompt<T>(
 
 extension PromptMultiSelectExtension on BasePrompt {
   /// Prompt the user to choose from a list of options.
-  Result<List<T>> selectMulti<T>(
+  Option<List<T>> selectMulti<T>(
     String question, {
     required List<T> choices,
     Guard<List<T>>? guard,
@@ -346,7 +350,7 @@ extension PromptMultiSelectExtension on BasePrompt {
 
 extension SingleSelectPromptMultiSelectExtension on SingleSelectPrompt {
   /// Prompt the user to choose from a list of options.
-  Result<List<T>> multi<T>(
+  Option<List<T>> multi<T>(
     String question, {
     required List<T> choices,
     Guard<List<T>>? guard,
@@ -368,7 +372,7 @@ extension SingleSelectPromptMultiSelectExtension on SingleSelectPrompt {
       );
 }
 
-typedef MultiSelectPrompt<T> = Result<List<T>> Function(
+typedef MultiSelectPrompt<T> = Option<List<T>> Function(
   String question, {
   required List<T> choices,
   Guard<T>? guard,

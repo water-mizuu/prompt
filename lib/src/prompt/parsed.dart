@@ -5,8 +5,8 @@ import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
 import "package:prompt/src/prompt/base.dart";
-import "package:prompt/src/result.dart";
 import "package:prompt/src/types.dart";
 
 abstract final class ParsedPromptDefaults {
@@ -14,7 +14,7 @@ abstract final class ParsedPromptDefaults {
   static const Color accentColor = Colors.brightBlue;
 }
 
-Result<T> parsedPrompt<T>(
+Option<T> parsedPrompt<T>(
   String question, {
   required Parser<T> parser,
   Guard<T>? guard,
@@ -88,7 +88,7 @@ Result<T> parsedPrompt<T>(
 }
 
 extension PromptParsedExtension on BasePrompt {
-  Result<O> parsed<O>(
+  Option<O> parsed<O>(
     String question, {
     required Parser<O> parser,
     Guard<O>? guard,
@@ -103,7 +103,7 @@ extension PromptParsedExtension on BasePrompt {
         accentColor: accentColor,
       );
 
-  Result<String> string(
+  Option<String> string(
     String question, {
     Guard<String>? guard,
     String? example,
@@ -117,7 +117,7 @@ extension PromptParsedExtension on BasePrompt {
         accentColor: accentColor,
       );
 
-  Result<core.int> int(
+  Option<core.int> int(
     String question, {
     Guard<core.int>? guard,
     String? example,
@@ -131,7 +131,7 @@ extension PromptParsedExtension on BasePrompt {
         accentColor: accentColor,
       );
 
-  Result<core.double> double(
+  Option<core.double> double(
     String question, {
     Guard<core.double>? guard,
     String? example,
@@ -145,7 +145,7 @@ extension PromptParsedExtension on BasePrompt {
         accentColor: accentColor,
       );
 
-  Result<core.BigInt> bigInt(
+  Option<core.BigInt> bigInt(
     String question, {
     Guard<core.BigInt>? guard,
     String? example,
@@ -159,7 +159,7 @@ extension PromptParsedExtension on BasePrompt {
         accentColor: accentColor,
       );
 
-  Result<core.bool> bool(
+  Option<core.bool> bool(
     String question, {
     Guard<core.bool>? guard,
     core.bool defaultValue = true,

@@ -4,7 +4,7 @@ abstract final class BasePromptDefaults {
   static const Color accentColor = Colors.brightBlue;
 }
 
-Result<String> basePrompt(
+Option<String> basePrompt(
   String question, {
   Guard<String>? guard,
   String? hint,
@@ -66,7 +66,7 @@ Result<String> basePrompt(
   }
 }
 
-Result<String> prompt(
+Option<String> prompt(
   String question, {
   Guard<String>? guard,
   String? hint,
@@ -80,7 +80,7 @@ Result<String> prompt(
     );
 
 extension PromptExtension on WrappedStdin {
-  Result<String> prompt(
+  Option<String> prompt(
     String question, {
     Guard<String>? guard,
     String? hint,
@@ -94,7 +94,7 @@ extension PromptExtension on WrappedStdin {
       );
 }
 
-typedef BasePrompt = Result<String> Function(
+typedef BasePrompt = Option<String> Function(
   String question, {
   Guard<String>? guard,
   String hint,

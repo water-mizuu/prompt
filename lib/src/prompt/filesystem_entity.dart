@@ -10,15 +10,15 @@ import "package:prompt/src/io/stdio/wrapper/stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
 import "package:prompt/src/prompt/shared/view.dart";
-import "package:prompt/src/result.dart";
 import "package:prompt/src/types.dart";
 
 abstract final class FileSystemEntityPromptDefaults {
   static const Color accentColor = Colors.brightBlue;
 }
 
-Result<FileSystemEntity> fileSystemEntityPrompt(
+Option<FileSystemEntity> fileSystemEntityPrompt(
   String question, {
   Directory? start,
   Guard<FileSystemEntity>? guard,
@@ -334,7 +334,7 @@ Result<FileSystemEntity> fileSystemEntityPrompt(
   } finally {}
 }
 
-Result<File> filePrompt(
+Option<File> filePrompt(
   String question, {
   Directory? start,
   Guard<File>? guard,
@@ -350,12 +350,9 @@ Result<File> filePrompt(
       ),
       hint: hint,
       accentColor: accentColor,
-    ).map((FileSystemEntity value) {
-      print(value);
-      return value as File;
-    });
+    ).map((FileSystemEntity value) => value as File);
 
-Result<Directory> directoryPrompt(
+Option<Directory> directoryPrompt(
   String question, {
   Directory? start,
   Guard<Directory>? guard,

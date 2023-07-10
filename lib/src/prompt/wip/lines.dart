@@ -1,7 +1,7 @@
 import "package:prompt/prompt.dart";
 import "package:prompt/src/io/exception.dart";
 
-Result<String> linesPrompt(
+Option<String> linesPrompt(
   String question, {
   Guard<String>? guard,
   String? example,
@@ -327,7 +327,7 @@ Result<String> linesPrompt(
 }
 
 extension PromptMultiLineExtension on BasePrompt {
-  Result<String> lines(
+  Option<String> lines(
     String question, {
     Guard<String>? guard,
     String? example,

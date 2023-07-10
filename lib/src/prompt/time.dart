@@ -15,7 +15,7 @@ enum _Meridiem {
   String toString() => switch (this) { am => "AM", pm => "PM" };
 }
 
-Result<DateTime> timePrompt(
+Option<DateTime> timePrompt(
   String question, {
   DateTime? start,
   Guard<DateTime>? guard,
@@ -260,7 +260,7 @@ Result<DateTime> timePrompt(
 
 extension PromptTimeExtension on BasePrompt {
   /// Prompt the user to choose from a list of options.
-  Result<DateTime> time(
+  Option<DateTime> time(
     String question, {
     DateTime? start,
     Guard<DateTime>? guard,
