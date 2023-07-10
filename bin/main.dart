@@ -1,4 +1,5 @@
 import "package:prompt/prompt.dart";
+import "package:prompt/src/prompt/filesystem_entity.dart";
 import "package:prompt/src/prompt/shared/view.dart";
 
 enum Month {
@@ -78,6 +79,7 @@ void testView(
 }
 
 void main() async {
+  filePrompt("Select a folder");
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }
@@ -91,11 +93,11 @@ void main() async {
   // prompt.double("A double greater than pi.", guard: Guards.numGreaterThan(3.14));
   // prompt.bigInt("A large integer", guard: Guards.greaterThan(200.n));
   // prompt.bool("Do you agree?".doubleUnderline());
-    // prompt.select(
-    //   "Which is your most favorite?",
-    //   choices: Month.values,
-    //   guard: Guards.notEquals(Month.march),
-    // );
+  // prompt.select(
+  //   "Which is your most favorite?",
+  //   choices: Month.values,
+  //   guard: Guards.notEquals(Month.march),
+  // );
   // prompt.select.multi(
   //   "What are your favorite months?",
   //   choices: Month.values,

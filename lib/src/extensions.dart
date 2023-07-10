@@ -1,3 +1,4 @@
+import "dart:io";
 import "dart:math" as math;
 
 import "package:prompt/src/types.dart";
@@ -224,4 +225,8 @@ extension BigIntExtension<N extends num> on N {
 
 extension IntegerExtension on int {
   int max(int right) => this > right ? this : right;
+}
+
+extension FileSystemEntityExtension on FileSystemEntity {
+  String get name => path.split(Platform.pathSeparator).last;
 }
