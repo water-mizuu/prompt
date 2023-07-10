@@ -1,6 +1,7 @@
 import "dart:core";
 import "dart:math" as math;
 
+import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
 import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
@@ -10,7 +11,6 @@ import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
 import "package:prompt/src/option.dart";
 import "package:prompt/src/prompt/base.dart";
-import "package:prompt/src/types.dart";
 
 abstract final class RangePromptDefaults {
   static const int min = 0;
@@ -103,9 +103,8 @@ Option<int> rangePrompt(
           throw SignalInterruptionException();
 
         case <int>[0x0d]:
-          if (guard case (GuardFunction<int> function, String message)
-              when !function(activeValue)) {
-            flagFailure(message);
+          if (guard?.call(activeValue) case False(:String failure)) {
+            flagFailure(failure);
           } else {
             break loop;
           }

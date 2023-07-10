@@ -1,7 +1,16 @@
 import "dart:math" as math;
 
-import "package:prompt/prompt.dart";
+import "package:prompt/src/extensions.dart";
+import "package:prompt/src/guard.dart";
+import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
+import "package:prompt/src/io/stdio/wrapper/stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/stdout.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
+import "package:prompt/src/prompt/base.dart";
 import "package:prompt/src/prompt/shared/view.dart";
 
 abstract final class SingleSelectPromptDefaults {
@@ -242,10 +251,12 @@ Option<T> singleSelectPrompt<T>(
       /// Clear the previous (including the question)
       clearDrawnScreen();
 
-      if (guard case (GuardFunction<T> function, String message) when !function(chosen)) {
+      if (guard?.call(chosen) case False(:String failure)) {
         hasFailed = true;
 
-        stdout.writeln("// $message".brightRed());
+        stdout.writeln("// $failure".brightRed());
+
+        continue;
       } else {
         /// Display the answer.
         stdout.write("+".color(accentColor));

@@ -16,7 +16,7 @@ library;
 export "dart:io" hide sleep, stderr, stdin, stdout;
 
 export "src/extensions.dart";
-export "src/guards.dart";
+export "src/guard.dart" hide False, True;
 export "src/io.dart";
 export "src/option.dart";
 export "src/prompt.dart";

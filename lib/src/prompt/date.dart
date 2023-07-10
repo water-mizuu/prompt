@@ -1,4 +1,5 @@
 import "package:prompt/src/extensions.dart";
+import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/decoration/style.dart";
 import "package:prompt/src/io/exception.dart";
@@ -191,10 +192,10 @@ Option<DateTime> datePrompt(
         stdout.eraseln();
         active = DateTime(activeYear, activeMonth, activeDay);
 
-        if (guard case (GuardFunction<DateTime> function, String message) when !function(active)) {
+        if (guard?.call(active) case False(:String failure)) {
           hasFailed = true;
 
-          stdout.writeln("// $message".brightRed());
+          stdout.writeln("// $failure".brightRed());
 
           continue;
         } else {
@@ -613,9 +614,9 @@ Option<DateTime> datePrompt(
         eraseScreen();
         active = DateTime(activeYear, activeMonth, activeDay);
 
-        if (guard case (GuardFunction<DateTime> function, String message) when !function(active)) {
+        if (guard?.call(active) case False(:String failure)) {
           hasFailed = true;
-          stdout.writeln("// $message".brightRed());
+          stdout.writeln("// $failure".brightRed());
 
           continue;
         } else {

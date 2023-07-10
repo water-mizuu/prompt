@@ -79,7 +79,13 @@ void testView(
 }
 
 void main() async {
-  directoryPrompt("Select a directory to create the project in.");
+  prompt.directory(
+    "Select a directory to create the project in.",
+    guard: Guard<Directory>.unit(
+      (Directory dir) => dir.name.endsWith("_test"),
+      "The name must end in _test!",
+    ),
+  );
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }

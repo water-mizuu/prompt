@@ -1,8 +1,19 @@
 import "dart:math" as math;
 
-import "package:prompt/prompt.dart";
+import "package:prompt/src/extensions.dart";
+import "package:prompt/src/guard.dart";
+import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
+import "package:prompt/src/io/stdio/context.dart";
+import "package:prompt/src/io/stdio/wrapper/stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/stdout.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
+import "package:prompt/src/prompt/base.dart";
 import "package:prompt/src/prompt/shared/view.dart";
+import "package:prompt/src/prompt/single_select.dart";
 
 abstract final class MultiSelectPromptDefaults {
   static const int start = 0;
@@ -288,8 +299,8 @@ Option<List<T>> multiSelectPrompt<T>(
       /// Display the answer.
       List<T> chosen = <T>[for (int index in chosenIndices) choices[index]];
 
-      if (guard case (GuardFunction<List<T>> function, String message) when !function(chosen)) {
-        stdout.writeln("// $message".brightRed());
+      if (guard?.call(chosen) case False(:String failure)) {
+        stdout.writeln("// $failure".brightRed());
         hasFailed = true;
 
         continue failure_loop;
@@ -297,7 +308,8 @@ Option<List<T>> multiSelectPrompt<T>(
 
       stdout.write("+".color(accentColor));
       stdout.write(" $question ");
-      for (void _ in stdout.contextBlock) {
+      try {
+        stdout.push();
         stdout.foregroundColor = accentColor;
 
         if (chosen.length > 5) {
@@ -305,6 +317,8 @@ Option<List<T>> multiSelectPrompt<T>(
         } else {
           stdout.writeln(chosen.join(", "));
         }
+      } finally {
+        stdout.pop();
       }
 
       return Success<List<T>>(chosen);

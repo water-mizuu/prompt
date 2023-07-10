@@ -1,4 +1,9 @@
-import "package:prompt/prompt.dart";
+import "package:prompt/src/guard.dart";
+import "package:prompt/src/io/decoration/color.dart";
+import "package:prompt/src/io/stdio/wrapper/stdout.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
 
 abstract final class BasePromptDefaults {
   static const Color accentColor = Colors.brightBlue;
@@ -51,9 +56,9 @@ Option<String> basePrompt(
     String input = stdin.readLineSync()?.trim() ?? "";
     stdout.movelnUp(); // Move back to the question line.
 
-    if (guard case (GuardFunction<String> function, String message) when !function(input)) {
+    if (guard?.call(input) case False(:String failure)) {
       resetDisplay();
-      displayFailure(input, message);
+      displayFailure(input, failure);
       hasFailed = true;
 
       continue;

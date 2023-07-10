@@ -3,6 +3,7 @@ import "dart:io" hide stdin, stdout;
 import "dart:math" as math;
 
 import "package:prompt/src/extensions.dart";
+import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
 import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
@@ -12,8 +13,10 @@ import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
 import "package:prompt/src/option.dart";
+import "package:prompt/src/prompt/base.dart";
 import "package:prompt/src/prompt/shared/view.dart";
-import "package:prompt/src/types.dart";
+
+typedef FSE = FileSystemEntity;
 
 abstract final class FileSystemEntityPromptDefaults {
   static const Color accentColor = Colors.brightBlue;
@@ -72,12 +75,16 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
     children = <FileSystemEntity>[const GhostDirectory(".."), ...activeDirectory.listSync()] //
       ..sort(
         (FileSystemEntity a, FileSystemEntity b) => switch ((a, b)) {
+          // Ghost always takes priority
           (GhostDirectory(), _) => -1,
           (_, GhostDirectory()) => 1,
+          // Then directories
           (Directory(), File()) => -1,
+          // And finally files.
           (File(), Directory()) => 1,
-          (FileSystemEntity(path: String leftPath), FileSystemEntity(path: String rightPath)) =>
-            leftPath.compareTo(rightPath),
+          // If the types are equal, then we compare their name alphabetically.
+          (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) =>
+            left.compareTo(right),
         },
       );
 
@@ -318,10 +325,9 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
 
       erase();
       chosenEntity = children[activeIndex];
-      if (guard case (GuardFunction<FileSystemEntity> function, String message)
-          when !function(chosenEntity)) {
-        stdout.writeln("// $message".brightRed());
 
+      if (guard?.call(chosenEntity) case False(:String failure)) {
+        stdout.writeln("// $failure".brightRed());
         hasFailed = true;
 
         continue;
@@ -356,13 +362,11 @@ Option<File> filePrompt(
     fileSystemEntityPrompt(
       question,
       start: start,
-      guard: (
-        (FileSystemEntity entity) => entity is File && (guard?.$1(entity) ?? true),
-        guard?.$2 ?? "Must be a file."
-      ),
+      guard: Guard<FSE>.unit((FSE entity) => entity is File, "Must be a file.")
+          .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
       accentColor: accentColor,
-    ).map((FileSystemEntity value) => value as File);
+    ).map((FSE value) => value as File);
 
 Option<Directory> directoryPrompt(
   String question, {
@@ -374,13 +378,27 @@ Option<Directory> directoryPrompt(
     fileSystemEntityPrompt(
       question,
       start: start,
-      guard: (
-        (FileSystemEntity entity) => entity is Directory && (guard?.$1(entity) ?? true),
-        guard?.$2 ?? "Must be a directory."
-      ),
+      guard: Guard<FSE>.unit((FSE entity) => entity is Directory, "Must be a directory.") //
+          .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
       accentColor: accentColor,
-    ).map((FileSystemEntity value) => value as Directory);
+    ).map((FSE value) => value as Directory);
+
+Option<Link> linkPrompt(
+  String question, {
+  Directory? start,
+  Guard<Link>? guard,
+  String? hint,
+  Color accentColor = FileSystemEntityPromptDefaults.accentColor,
+}) =>
+    fileSystemEntityPrompt(
+      question,
+      start: start,
+      guard: Guard<FSE>.unit((FSE entity) => entity is Directory, "Must be a directory.") //
+          .map((Guard<FSE> type) => guard != null ? type & guard : type),
+      hint: hint,
+      accentColor: accentColor,
+    ).map((FSE value) => value as Link);
 
 final class GhostDirectory implements Directory {
   const GhostDirectory(this.path);
@@ -479,4 +497,66 @@ final class GhostDirectory implements Directory {
   Stream<FileSystemEvent> watch({int events = FileSystemEvent.all, bool recursive = false}) {
     throw UnsupportedError("Cannot watch a ghost directory.");
   }
+}
+
+extension PromptFileSystemEntityExtension on BasePrompt {
+  Option<FileSystemEntity> fileSystemEntity(
+    String question, {
+    Directory? start,
+    Guard<FileSystemEntity>? guard,
+    String? hint,
+    Color accentColor = FileSystemEntityPromptDefaults.accentColor,
+  }) =>
+      fileSystemEntityPrompt(
+        question,
+        start: start,
+        guard: guard,
+        hint: hint,
+        accentColor: accentColor,
+      );
+
+  Option<Directory> directory(
+    String question, {
+    Directory? start,
+    Guard<Directory>? guard,
+    String? hint,
+    Color accentColor = FileSystemEntityPromptDefaults.accentColor,
+  }) =>
+      directoryPrompt(
+        question,
+        start: start,
+        guard: guard,
+        hint: hint,
+        accentColor: accentColor,
+      );
+
+  Option<File> file(
+    String question, {
+    Directory? start,
+    Guard<File>? guard,
+    String? hint,
+    Color accentColor = FileSystemEntityPromptDefaults.accentColor,
+  }) =>
+      filePrompt(
+        question,
+        start: start,
+        guard: guard,
+        hint: hint,
+        accentColor: accentColor,
+      );
+
+  Option<Link> link(
+    String question, {
+    Directory? start,
+    Guard<Link>? guard,
+    String? hint,
+    Color accentColor = FileSystemEntityPromptDefaults.accentColor,
+  }) =>
+      linkPrompt(
+        question,
+        start: start,
+        guard: guard,
+        hint: hint,
+        accentColor: accentColor,
+      );
 }

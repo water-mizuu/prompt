@@ -1,6 +1,7 @@
 import "dart:core" as core show BigInt, bool, double, int;
 import "dart:core";
 
+import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
@@ -72,9 +73,9 @@ Option<T> parsedPrompt<T>(
 
       continue;
     }
-    if (guard case (GuardFunction<T> function, String message) when !function(parsed)) {
+    if (guard?.call(parsed) case False(:String failure)) {
       resetDisplay();
-      displayFailure(rawInput, message);
+      displayFailure(rawInput, failure);
       hasFailed = true;
 
       continue;

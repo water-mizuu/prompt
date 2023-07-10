@@ -1,5 +1,16 @@
-import "package:prompt/prompt.dart";
+import "package:prompt/src/extensions.dart";
+import "package:prompt/src/guard.dart";
+import "package:prompt/src/io/decoration/color.dart";
+import "package:prompt/src/io/decoration/style.dart";
 import "package:prompt/src/io/exception.dart";
+import "package:prompt/src/io/stdio/context.dart";
+import "package:prompt/src/io/stdio/wrapper/stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/stdout.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
+import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
+import "package:prompt/src/option.dart";
+import "package:prompt/src/prompt/base.dart";
+import "package:prompt/src/types.dart";
 
 Option<String> linesPrompt(
   String question, {
@@ -285,9 +296,9 @@ Option<String> linesPrompt(
       }
       stdout.moveUp(content.length + 1 + increment);
 
-      if (guard case (GuardFunction<String> function, String message) when !function(built)) {
+      if (guard?.call(built) case False(:String failure)) {
         stdout.eraselnFromCursor();
-        stdout.writeln("// $message".brightRed());
+        stdout.writeln("// $failure".brightRed());
         hasFailed = true;
 
         continue;
