@@ -87,7 +87,7 @@ int? compute() => switch (Random().nextDouble()) {
 
 void main() async {
   int? value = compute();
-  var v = value.map((int c) => c + 1);
+  int? v = value.map((int c) => c + 1);
   stdout.box(v);
   prompt.directory(
     "Select a directory to create the project in.",

@@ -81,5 +81,5 @@ final class Success<T> implements Option<T> {
 
 extension FutureFailureOrMethods<E> on Future<Option<E>> {
   Future<E> unwrap() => then((Option<E> result) => result.unwrap());
-  Future<E?> unwrapNullable() => then((Option<E> result) => result.nullable());
+  Future<E?> nullable() => then((Option<E> result) => result.nullable());
 }
