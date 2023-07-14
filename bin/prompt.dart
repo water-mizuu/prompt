@@ -2,6 +2,7 @@ import "dart:math";
 
 import "package:prompt/prompt.dart";
 import "package:prompt/src/prompt/shared/view.dart";
+import "package:prompt/src/prompt/wip/lines.dart";
 
 enum Month {
   january,
@@ -98,16 +99,16 @@ void main() async {
       )
       .unwrap();
 
-  // stdout.box(chosen);
-  // for (List<int> key in stdin.syncInterrupt) {
-  //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
-  // }
-  // prompt
-  //     .lines(
-  //       "Tell us about yourself",
-  //       guard: Guards.stringIsNotEmpty(),
-  //     )
-  //     .nullable();
+  stdout.box(chosen);
+  for (List<int> key in stdin.syncInterrupt) {
+    stdout.box(key.map((int v) => v.map((int c) => c.toRadixString(16).padLeft(2, "0"))));
+  }
+  prompt
+      .lines(
+        "Tell us about yourself",
+        guard: Guards.stringIsNotEmpty(),
+      )
+      .nullable();
   // prompt.range("An even multiple of 3", step: 3, min: -128, guard: Guards.intIsEven());
   // prompt.double("A double greater than pi.", guard: Guards.numGreaterThan(3.14));
   // prompt.bigInt("A large integer", guard: Guards.greaterThan(200.n));

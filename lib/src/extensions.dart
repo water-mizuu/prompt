@@ -148,11 +148,13 @@ extension PredicateExtension<T> on Predicate<T> {
 }
 
 extension NullableFunctionalExtension<T> on T? {
+  void apply(void Function(T value) action) => switch (this) { T value => action(value), _ => null };
   O? map<O>(O Function(T value) mapper) => switch (this) { T value => mapper(value), _ => null };
   T? where(bool Function(T value) predicate) => switch (this) { T value when predicate(value) => value, _ => null };
 }
 
 extension NonNullableFunctionalExtension<T extends Object> on T {
+  void apply(void Function(T value) action) => action(this);
   O map<O>(O Function(T value) mapper) => mapper(this);
   T? where(bool Function(T value) predicate) => switch (this) { T value when predicate(value) => value, _ => null };
 }
