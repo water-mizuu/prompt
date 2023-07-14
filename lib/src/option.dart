@@ -44,7 +44,7 @@ final class Failure<T> implements Option<T> {
 
   @override
   Never unwrap() => throw CustomError(
-        "[.unwrap] called on [Failure]",
+        "[unwrap] called on [Failure]",
         message: failure,
         title: "Unwrap Failure",
       );

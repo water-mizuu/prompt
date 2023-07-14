@@ -1,12 +1,12 @@
 import "package:prompt/prompt.dart";
 
-typedef True = Success<bool>;
-typedef False = Failure<bool>;
+typedef True = Success<void>;
+typedef False = Failure<void>;
 
 sealed class Guard<T> {
   const factory Guard.unit(Predicate<T> function, String failure) = UnitGuard<T>;
 
-  Option<bool> call(T value);
+  Option<void> call(T value);
 }
 
 final class UnitGuard<T> implements Guard<T> {
@@ -16,7 +16,7 @@ final class UnitGuard<T> implements Guard<T> {
   final String message;
 
   @override
-  Option<bool> call(T value) => test(value) ? const Success<bool>(true) : Failure<bool>(message);
+  Option<void> call(T value) => test(value) ? const True(null) : False(message);
 }
 
 final class OrGuard<T> implements Guard<T> {
@@ -26,10 +26,10 @@ final class OrGuard<T> implements Guard<T> {
   final Guard<T> right;
 
   @override
-  Option<bool> call(T value) => switch (left.call(value)) {
-        True() => const True(true),
+  Option<void> call(T value) => switch (left.call(value)) {
+        True result => result,
         False(failure: String left) => switch (right.call(value)) {
-            True() => const True(true),
+            True result => result,
             False(failure: String right) => False("$left\n$right"),
           },
       };
@@ -42,11 +42,11 @@ final class AndGuard<T> implements Guard<T> {
   final Guard<T> right;
 
   @override
-  Option<bool> call(T value) => switch (left.call(value)) {
-        False(:String failure) => False(failure),
-        True() => switch (right.call(value)) {
-            False(:String failure) => False(failure),
-            True() => const True(true),
+  Option<void> call(T value) => switch (left.call(value)) {
+        False failure => failure,
+        True _ => switch (right.call(value)) {
+            False failure => failure,
+            True _ => const True(null),
           },
       };
 }
@@ -58,11 +58,11 @@ final class ExclusiveOrGuard<T> implements Guard<T> {
   final Guard<T> right;
 
   @override
-  Option<bool> call(T value) => switch ((left.call(value), right.call(value))) {
+  Option<void> call(T value) => switch ((left.call(value), right.call(value))) {
         (False left, False right) => False("${left.failure}\n${right.failure}"),
-        (True _, False _) => const True(true),
-        (False _, True _) => const True(true),
-        (True(), True()) => const False("Both guards passed!"),
+        (True _, False _) => const True(null),
+        (False _, True _) => const True(null),
+        (True _, True _) => const False("Both guards passed!"),
       };
 }
 
@@ -138,7 +138,7 @@ abstract final class Guards {
       ).toGuard();
 
   static Guard<C> greaterThanEquals<C extends Comparable<C>>(C value) => (
-      (C v) => v.compareTo(value) >= 0,
+        (C v) => v.compareTo(value) >= 0,
         "Must be greater than $value!",
       ).toGuard();
 
@@ -152,6 +152,21 @@ abstract final class Guards {
   static Guard<String> stringIsNotEmpty() => (
         (String v) => v.isNotEmpty,
         "Must not be empty!",
+      ).toGuard();
+
+  static Guard<String> stringStartsWith(String other, [int index = 0]) => (
+        (String v) => v.startsWith(other, index),
+        "Must start with $other!",
+      ).toGuard();
+
+  static Guard<String> stringEndsWith(String other) => (
+        (String v) => v.endsWith(other),
+        "Must end with $other!",
+      ).toGuard();
+
+  static Guard<String> stringMatches(Pattern pattern, [int startIndex = 0]) => (
+        (String v) => pattern.matchAsPrefix(v, startIndex) != null,
+        "Must match $pattern!",
       ).toGuard();
 
   // Set guards
@@ -222,12 +237,74 @@ abstract final class Guards {
       ).toGuard();
 
   static Guard<DateTime> beforeOrOnNow() => (
-        (DateTime v) => v.isBefore(DateTime.now().minimalDate().add(const Duration(days: 1))),
+        (DateTime v) => v.isBefore(
+              DateTime.now().minimalDate().add(const Duration(days: 1)),
+            ),
         "Must be today or before today!",
       ).toGuard();
 
   static Guard<DateTime> afterOrOnNow() => (
-        (DateTime v) => v.isAfter(DateTime.now().minimalDate().subtract(const Duration(days: 1))),
+        (DateTime v) => v.isAfter(
+              DateTime.now().minimalDate().subtract(const Duration(days: 1)),
+            ),
         "Must be today or after today!",
+      ).toGuard();
+
+  // FileSystemEntity guards
+
+  static Guard<F> nameStartsWith<F extends FileSystemEntity>(String prefix) => (
+        (F v) => v.name.startsWith(prefix),
+        "Must start with $prefix!",
+      ).toGuard();
+
+  static Guard<F> nameEndsWith<F extends FileSystemEntity>(String suffix) => (
+        (F v) => v.name.endsWith(suffix),
+        "Must end with $suffix!",
+      ).toGuard();
+
+  static Guard<F> nameMatches<F extends FileSystemEntity>(Pattern pattern, [int startIndex = 0]) =>
+      (
+        (F v) => pattern.matchAsPrefix(v.name, startIndex) != null,
+        "Must match $pattern!",
+      ).toGuard();
+
+  static Guard<F> pathStartsWith<F extends FileSystemEntity>(String prefix) => (
+        (F v) => v.path.startsWith(prefix),
+        "Must start with $prefix!",
+      ).toGuard();
+
+  static Guard<F> pathEndsWith<F extends FileSystemEntity>(String suffix) => (
+        (F v) => v.path.endsWith(suffix),
+        "Must end with $suffix!",
+      ).toGuard();
+
+  static Guard<F> pathMatches<F extends FileSystemEntity>(Pattern pattern, [int startIndex = 0]) =>
+      (
+        (F v) => pattern.matchAsPrefix(v.path, startIndex) != null,
+        "Must match $pattern!",
+      ).toGuard();
+
+  // Directory
+
+  static Guard<Directory> directoryIsEmpty() => (
+        (Directory v) => v.listSync().isEmpty,
+        "Must be empty!",
+      ).toGuard();
+
+  static Guard<Directory> directoryIsNotEmpty() => (
+        (Directory v) => v.listSync().isNotEmpty,
+        "Must not be empty!",
+      ).toGuard();
+
+  // File
+
+  static Guard<File> fileIsEmpty() => (
+        (File v) => v.readAsStringSync().isEmpty,
+        "Must be empty!",
+      ).toGuard();
+
+  static Guard<File> fileIsNotEmpty() => (
+        (File v) => v.readAsStringSync().isNotEmpty,
+        "Must not be empty!",
       ).toGuard();
 }
