@@ -1,7 +1,6 @@
 import "dart:math";
 
 import "package:prompt/prompt.dart";
-import "package:prompt/src/prompt/filesystem_entity.dart";
 import "package:prompt/src/prompt/shared/view.dart";
 
 enum Month {
@@ -51,7 +50,9 @@ void testView(
     stdout.write(
       "#"
           .brightBlue(iff: index == ind)
-          .brightCyan(iff: index - topDisparity <= ind && ind <= index + bottomDisparity)
+          .brightCyan(
+            iff: index - topDisparity <= ind && ind <= index + bottomDisparity,
+          )
           .italic(iff: viewStart <= ind && ind < viewEnd)
           .brightBlack(iff: viewStart > ind || ind >= viewEnd),
     );
@@ -80,22 +81,24 @@ void testView(
   );
 }
 
-int? compute() => switch (Random().nextDouble()) {
-      > 0.5 => 1,
-      _ => null,
-    };
+class MyClass {}
 
 void main() async {
-  int? value = compute();
-  int? v = value.map((int c) => c + 1);
-  stdout.box(v);
-  prompt.directory(
-    "Select a directory to create the project in.",
-    guard: Guard<Directory>.unit(
-      (Directory dir) => dir.name.endsWith("_test"),
-      "The name must end in _test!",
-    ),
-  );
+  int? value = switch (Random().nextDouble()) {
+    > 0.5 => 1,
+    _ => null,
+  };
+  int? mapped = value.map((int c) => c + 1);
+  stdout.box(mapped);
+
+  File? chosen = prompt
+      .file(
+        "Select a directory to create the project in.",
+        guard: Guards.nameEndsWith(".dart"),
+      )
+      .unwrap();
+
+  // stdout.box(chosen);
   // for (List<int> key in stdin.syncInterrupt) {
   //   stdout.box(key.map((v) => v.map((c) => c.toRadixString(16).padLeft(2, "0"))));
   // }
