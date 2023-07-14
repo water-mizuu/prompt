@@ -7,7 +7,6 @@ import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
 import "package:prompt/src/io/stdio/block/stdout/context.dart";
-import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
 import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
@@ -23,6 +22,17 @@ abstract final class FileSystemEntityPromptDefaults {
   static const Color accentColor = Colors.brightBlue;
 }
 
+int compareFileSystemEntity(FileSystemEntity a, FileSystemEntity b) => switch ((a, b)) {
+      // directories
+      (Directory(), File()) => -1,
+      // And finally files.
+      (File(), Directory()) => 1,
+      // If the types are equal, then we compare their name alphabetically.
+      (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) => left.compareTo(right),
+    };
+
+int index = 0;
+
 Option<FileSystemEntity> fileSystemEntityPrompt(
   String question, {
   Directory? start,
@@ -36,7 +46,6 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   int bottomDisparity = 2;
   Directory activeDirectory = start;
 
-  Queue<int> indexHistory = Queue<int>()..addLast(0);
   bool hasFailed = false;
 
   late int activeIndex;
@@ -59,6 +68,10 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
         stdout.write("${entity.name}/");
       } else {
         stdout.write(entity.name);
+        stdout.write(
+          " [${entity.statSync().size.toString().replaceAll(RegExp(r"\B(?=(\d{3})+(?!\d))"), ",")} bytes]"
+              .brightBlack(),
+        );
       }
     }
   }
@@ -71,22 +84,9 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   }
 
   // ignore: no_leading_underscores_for_local_identifiers
-  void update([int _activeIndex = 0]) {
-    activeIndex = _activeIndex;
-    children = <FileSystemEntity>[const GhostDirectory(".."), ...activeDirectory.listSync()] //
-      ..sort(
-        (FileSystemEntity a, FileSystemEntity b) => switch ((a, b)) {
-          // Ghost always takes priority
-          (GhostDirectory(), _) => -1,
-          (_, GhostDirectory()) => 1,
-          // Then directories
-          (Directory(), File()) => -1,
-          // And finally files.
-          (File(), Directory()) => 1,
-          // If the types are equal, then we compare their name alphabetically.
-          (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) => left.compareTo(right),
-        },
-      );
+  void update({Directory? previous}) {
+    children = activeDirectory.listSync()..sort(compareFileSystemEntity);
+    activeIndex = previous == null ? 0 : children.indexWhere((FileSystemEntity e) => e.path == previous.path);
 
     int intrinsicViewLimit = <int>{
       children.length,
@@ -121,15 +121,9 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
 
     stdout.context(() {
       stdout.foregroundColor = Colors.brightBlack;
-      switch (children[activeIndex]) {
-        case GhostDirectory _:
-          stdout.write(activeDirectory.parent.compactPath);
-          stdout.write(Platform.pathSeparator);
-        case FileSystemEntity _:
-          stdout.write(activeDirectory.compactPath);
-          stdout.write(Platform.pathSeparator);
-          stdout.write(children[activeIndex].name);
-      }
+      stdout.write(activeDirectory.compactPath);
+      stdout.write(Platform.pathSeparator);
+      stdout.write(children[activeIndex].name);
     });
   }
 
@@ -169,6 +163,13 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
     stdout.eraseln();
     displayEntity(activeIndex, viewIndex);
     stdout.movelnStart();
+
+    /// Flush the stdout buffer.
+    stdout.moveDown(viewLimit - viewIndex);
+    stdout.writeln("${index + 1}");
+    stdout.moveUp(viewLimit - viewIndex + 1);
+
+    index += 1;
   }
 
   void moveUp() {
@@ -261,36 +262,32 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   }
 
   void moveBack() {
-    if (indexHistory.isEmpty) {
-      indexHistory.addLast(0);
-    }
+    Directory previous = activeDirectory;
     activeDirectory = activeDirectory.parent;
     erase();
-    update(indexHistory.removeLast());
+    hasFailed = false;
+    update(previous: previous);
     draw();
   }
 
   void moveFront(Directory directory) {
-    indexHistory.addLast(activeIndex);
     activeDirectory = directory;
     erase();
+    hasFailed = false;
     update();
     draw();
   }
 
   void moveIntoActive() {
-    switch (children[activeIndex]) {
-      case GhostDirectory _:
-        moveBack();
-      case Directory directory:
-        moveFront(directory);
+    if (children[activeIndex] case Directory directory) {
+      moveFront(directory);
     }
     hasFailed = false;
   }
 
   try {
     stdout.push();
-    stdout.hideCursor();
+    // stdout.hideCursor();
 
     update();
 
@@ -381,7 +378,10 @@ Option<Directory> directoryPrompt(
     fileSystemEntityPrompt(
       question,
       start: start,
-      guard: Guard<FSE>.unit((FSE entity) => entity is Directory, "Must be a directory.") //
+      guard: Guard<FSE>.unit(
+        (FSE entity) => entity is Directory,
+        "Must be a directory.",
+      ) //
           .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
       accentColor: accentColor,
@@ -397,109 +397,14 @@ Option<Link> linkPrompt(
     fileSystemEntityPrompt(
       question,
       start: start,
-      guard: Guard<FSE>.unit((FSE entity) => entity is Directory, "Must be a directory.") //
+      guard: Guard<FSE>.unit(
+        (FSE entity) => entity is Directory,
+        "Must be a directory.",
+      ) //
           .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
       accentColor: accentColor,
     ).map((FSE value) => value as Link);
-
-final class GhostDirectory implements Directory {
-  const GhostDirectory(this.path);
-
-  @override
-  final String path;
-
-  @override
-  Directory get absolute => this;
-
-  @override
-  Future<Directory> create({bool recursive = false}) {
-    throw UnsupportedError("Cannot create a ghost directory.");
-  }
-
-  @override
-  void createSync({bool recursive = false}) {
-    throw UnsupportedError("Cannot create a ghost directory.");
-  }
-
-  @override
-  Future<Directory> createTemp([String? prefix]) {
-    throw UnsupportedError("Cannot create a ghost directory.");
-  }
-
-  @override
-  Directory createTempSync([String? prefix]) {
-    throw UnsupportedError("Cannot create a ghost directory.");
-  }
-
-  @override
-  Future<FileSystemEntity> delete({bool recursive = false}) {
-    throw UnsupportedError("Cannot delete a ghost directory.");
-  }
-
-  @override
-  void deleteSync({bool recursive = false}) {
-    throw UnsupportedError("Cannot delete a ghost directory.");
-  }
-
-  @override
-  Future<bool> exists() async => false;
-
-  @override
-  bool existsSync() => false;
-
-  @override
-  bool get isAbsolute => false;
-
-  @override
-  Stream<FileSystemEntity> list({bool recursive = false, bool followLinks = true}) async* {}
-
-  @override
-  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) => <FileSystemEntity>[];
-
-  @override
-  Directory get parent {
-    throw UnsupportedError("Cannot get the parent of a ghost directory.");
-  }
-
-  @override
-  Future<Directory> rename(String newPath) {
-    throw UnsupportedError("Cannot rename a ghost directory.");
-  }
-
-  @override
-  Directory renameSync(String newPath) {
-    throw UnsupportedError("Cannot rename a ghost directory.");
-  }
-
-  @override
-  Future<String> resolveSymbolicLinks() {
-    throw UnsupportedError("Cannot resolve a ghost directory.");
-  }
-
-  @override
-  String resolveSymbolicLinksSync() {
-    throw UnsupportedError("Cannot resolve a ghost directory.");
-  }
-
-  @override
-  Future<FileStat> stat() {
-    throw UnsupportedError("Cannot find stat of ghost directory.");
-  }
-
-  @override
-  FileStat statSync() {
-    throw UnsupportedError("Cannot find stat of ghost directory.");
-  }
-
-  @override
-  Uri get uri => Uri(path: path);
-
-  @override
-  Stream<FileSystemEvent> watch({int events = FileSystemEvent.all, bool recursive = false}) {
-    throw UnsupportedError("Cannot watch a ghost directory.");
-  }
-}
 
 extension PromptFileSystemEntityExtension on BasePrompt {
   Option<FileSystemEntity> fileSystemEntity(
