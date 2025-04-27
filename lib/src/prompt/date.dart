@@ -50,6 +50,9 @@ Option<DateTime> datePrompt(
     _Focus focus = _Focus.year;
 
     void drawQuestion() {
+      DateTime(year: activeYear, month: activeMonth, day: activeDay) =
+          DateTime(activeYear, activeMonth, activeDay);
+
       stdout.write("?".color(accentColor));
       stdout.write(" $question ");
       if (hint != null) {
@@ -86,10 +89,7 @@ Option<DateTime> datePrompt(
 
       for (;;) {
         /// The DateTime constructor does magic that corrects incorrect data like
-        ///   `2022-(-1)-(-5)` -> `2021-11-25`.
-        DateTime(year: activeYear, month: activeMonth, day: activeDay) =
-            DateTime(activeYear, activeMonth, activeDay);
-
+        ///   `2022-(-1)-(-5)` -> `2021-11-25`
         drawQuestion();
 
         loop:

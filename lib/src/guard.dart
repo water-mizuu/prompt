@@ -103,6 +103,32 @@ abstract final class Guards {
         "Must be greater than $value!",
       ).toGuard();
 
+  // Double guards
+  static Guard<double> doubleGreaterThan(double value) => (
+        (double v) => v.compareTo(value) > 0,
+        "Must be greater than $value!",
+      ).toGuard();
+
+  static Guard<double> doubleLessThan(double value) => (
+        (double v) => v.compareTo(value) < 0,
+        "Must be greater than $value!",
+      ).toGuard();
+
+  static Guard<double> doubleEquals(double value) => (
+        (double v) => v == value,
+        "Must be equal to $value!",
+      ).toGuard();
+
+  static Guard<double> doubleGreaterThanEqual(double value) => (
+        (double v) => v.compareTo(value) >= 0,
+        "Must be greater than $value!",
+      ).toGuard();
+
+  static Guard<double> doubleLessThanEqual(double value) => (
+        (double v) => v.compareTo(value) <= 0,
+        "Must be greater than $value!",
+      ).toGuard();
+
   // Integer guards
 
   static Guard<int> intIsOdd() => (
@@ -202,6 +228,16 @@ abstract final class Guards {
 
   static Guard<Iterable<T>> notContains<T>(T value, [String? name]) => (
         (Iterable<T> v) => !v.contains(value),
+        "Must contain ${name ?? value}!",
+      ).toGuard();
+
+  static Guard<List<T>> listContains<T>(T value, [String? name]) => (
+        (List<T> v) => v.contains(value),
+        "Must contain ${name ?? value}!",
+      ).toGuard();
+
+  static Guard<List<T>> listNotContains<T>(T value, [String? name]) => (
+        (List<T> v) => !v.contains(value),
         "Must contain ${name ?? value}!",
       ).toGuard();
 

@@ -274,6 +274,20 @@ Option<List<T>> multiSelectPrompt<T>(
             stdout.eraseln();
             displayItemAt(activeIndex, viewIndex);
 
+          case <int>[0x1b, 0x5b, 0x43]:
+            // right
+            if (chosenIndices.add(activeIndex)) {
+              stdout.eraseln();
+              displayItemAt(activeIndex, viewIndex);
+            }
+
+          case <int>[0x1b, 0x5b, 0x44]:
+            // left
+            if (chosenIndices.remove(activeIndex)) {
+              stdout.eraseln();
+              displayItemAt(activeIndex, viewIndex);
+            }
+
           case <int>[0x0d]:
             break key_loop;
 

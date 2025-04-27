@@ -1,6 +1,5 @@
 analyzer:
   enable-experiment:
-    - inline-class
     - variance
   language:
     strict-inference: true
@@ -20,8 +19,7 @@ linter:
     always_declare_return_types: true
     always_put_control_body_on_new_line: false
     always_put_required_named_parameters_first: true
-    always_require_non_null_named_parameters: true
-    always_specify_types: true
+    always_specify_types: false
     always_use_package_imports: true
     annotate_overrides: true
     avoid_annotating_with_dynamic: false
@@ -49,8 +47,6 @@ linter:
     avoid_relative_lib_imports: true
     avoid_renaming_method_parameters: true
     avoid_return_types_on_setters: false
-    avoid_returning_null: true
-    avoid_returning_null_for_future: true
     avoid_returning_null_for_void: true
     avoid_returning_this: false
     avoid_setters_without_getters: true
@@ -128,7 +124,6 @@ linter:
     one_member_abstracts: false
     only_throw_errors: true
     overridden_fields: true
-    package_api_docs: true
     package_names: true
     package_prefixed_library_names: true
     parameter_assignments: true
@@ -217,7 +212,6 @@ linter:
     unnecessary_to_list_in_spreads: true
     unreachable_from_main: true
     unrelated_type_equality_checks: true
-    unsafe_html: true
     use_build_context_synchronously: true
     use_colored_box: true
     use_decorated_box: true

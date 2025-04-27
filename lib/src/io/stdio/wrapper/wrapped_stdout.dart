@@ -76,4 +76,10 @@ class WrappedStdout implements io.Stdout {
 
   @override
   Future<dynamic> get done => stdout.done;
+
+  @override
+  String get lineTerminator => stdout.lineTerminator;
+
+  @override
+  set lineTerminator(String value) => stdout.lineTerminator = value;
 }

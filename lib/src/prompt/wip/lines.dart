@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:prompt/src/extensions.dart";
 import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
@@ -43,7 +45,13 @@ Option<String> linesPrompt(
   void tab() {
     /// This is late because it's possible for y = 0.
     ///  ∴ We can't use `content[y - 1]` as a default value.
-    late int previousIndent = content[y - 1].takeWhile((String c) => c == " ").length - x;
+
+    late int previousIndent = content.reversed
+            .skipWhile((p) => p.join().trim().isEmpty)
+            .firstOrNull
+            ?.takeWhile((String c) => c == " ")
+            .length ??
+        0 - x;
 
     if (y <= 0 || previousIndent <= 0) {
       // Just indent.
@@ -57,6 +65,14 @@ Option<String> linesPrompt(
 
       x += previousIndent;
     }
+  }
+
+  void reverseTab() {
+    /// This is late because it's possible for y = 0.
+    ///  ∴ We can't use `content[y - 1]` as a default value.
+    var toMove = x - max(x - 2, 0) as int;
+
+    stdout.moveLeft(toMove);
   }
 
   void up() {
@@ -241,6 +257,11 @@ Option<String> linesPrompt(
           ..write("// CTRL+D to confirm".brightBlack());
 
         stdout.writeln(buffer);
+
+        var cursor = stdout.cursor?.line;
+        if (cursor != null && cursor + 1 >= stdout.terminalLines) {
+          stdout.scrollUp();
+        }
       }
 
       for (List<String> line in content) {
@@ -264,6 +285,9 @@ Option<String> linesPrompt(
 
           case <int>[0x09]: // tab
             tab();
+
+          case <int>[0x1b, 0x5b, 0x5a]: // shift tab
+            reverseTab();
 
           case <int>[0x1b, 0x5b, 0x41]: // up
             up();
@@ -290,11 +314,7 @@ Option<String> linesPrompt(
 
       stdout.moveLeft(x);
       stdout.moveUp(y + 1 + increment);
-      for (int i = 0; i < content.length + 1 + increment; ++i) {
-        stdout.eraselnFromCursor();
-        stdout.moveDown();
-      }
-      stdout.moveUp(content.length + 1 + increment);
+      stdout.eraselnDown(content.length + 1 + increment);
 
       if (guard?.call(built) case False(:String failure)) {
         stdout.eraselnFromCursor();
@@ -307,7 +327,7 @@ Option<String> linesPrompt(
       StringBuffer buffer = StringBuffer()
         ..write("+".color(accentColor))
         ..write(" $formattedQuestion ")
-        ..write(built.split("\n").join(r"\n").ellipsisVisible(30).color(accentColor));
+        ..write(built.trimLeft().split("\n").join(r"\n").ellipsisVisible(30).color(accentColor));
 
       stdout.writeln(buffer);
 
@@ -318,11 +338,7 @@ Option<String> linesPrompt(
 
     stdout.moveLeft(x);
     stdout.moveUp(y + 1 + increment);
-    for (int i = 0; i < content.length + 1 + increment; ++i) {
-      stdout.eraselnFromCursor();
-      stdout.moveDown();
-    }
-    stdout.moveUp(content.length + 1 + increment);
+    stdout.eraselnDown(content.length + 1 + increment);
 
     StringBuffer buffer = StringBuffer()
       ..write("!".brightRed())

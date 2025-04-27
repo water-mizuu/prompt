@@ -3,16 +3,16 @@
 import "package:prompt/src/io/ffi/termlib.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdin.dart";
 
-final TermLib _lib = TermLib();
+final TermLib lib = TermLib();
 
 extension StdinExtension on WrappedStdin {
   int get cr => 0xd;
   int get lf => 0xa;
 
-  void enableRawMode() => _lib.enableRawMode();
-  void disableRawMode() => _lib.disableRawMode();
+  void enableRawMode() => lib.enableRawMode();
+  void disableRawMode() => lib.disableRawMode();
 
-  bool get rawMode => _lib.isRawModeEnabled;
+  bool get rawMode => lib.isRawModeEnabled;
   set rawMode(bool value) => value ? enableRawMode() : disableRawMode();
 
   /// Synchronously iterates over the input stream.

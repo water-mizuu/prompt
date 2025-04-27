@@ -5,9 +5,9 @@
 ///     [x] Add support for hints
 ///     [x] Add support for guards
 ///   [x] Create a prompt for a `Time`.
-///   [ ] Create a unified prompt for a `DateTime`.
+///   [x] Create a unified prompt for a `DateTime`.
 ///   [ ] Create a prompt for a `Duration`.
-///   [ ] Create a prompt for a passwords.
+///   [x] Create a prompt for a passwords.
 ///   [x] Create a prompt for a `Directory`.
 ///   [x] Create a prompt for a `File`.
 

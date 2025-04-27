@@ -7,12 +7,17 @@ class TimePromptDefaults {
 
 enum _FocusMode { hour, minute, meridiem }
 
-enum _Meridiem {
+enum Meridiem {
   am,
   pm;
 
   @override
   String toString() => switch (this) { am => "AM", pm => "PM" };
+
+  Meridiem get inverse => switch (this) {
+    am => pm,
+    pm => am,
+  };
 }
 
 Option<DateTime> timePrompt(
@@ -23,16 +28,16 @@ Option<DateTime> timePrompt(
 }) {
   start ??= DateTime.now();
   String formattedQuestion = question.bold();
-  const ({int hour, int minute, int meridiem}) paddingSizes = (hour: 2, minute: 2, meridiem: 2);
+  const ({int hour, int meridiem, int minute}) paddingSizes = (hour: 2, minute: 2, meridiem: 2);
 
   try {
     stdout.push();
     stdout.hideCursor();
 
     _FocusMode focusMode = _FocusMode.hour;
-    _Meridiem activeMeridiem = switch (start.hour) {
-      >= 0 && < 12 => _Meridiem.am,
-      _ => _Meridiem.pm,
+    Meridiem activeMeridiem = switch (start.hour) {
+      >= 0 && < 12 => Meridiem.am,
+      _ => Meridiem.pm,
     };
     int activeHour = switch (start.hour) {
       0 || 12 => 12,
@@ -79,30 +84,15 @@ Option<DateTime> timePrompt(
       buffer.write("  ");
 
       /// HH
-      buffer.write(
-        switch (focusMode) {
-          _FocusMode.hour => hour.inverted(),
-          _ => hour,
-        },
-      );
+      buffer.write(hour.inverted(iff: focusMode == _FocusMode.hour));
       buffer.write(" : ");
 
       /// MM
-      buffer.write(
-        switch (focusMode) {
-          _FocusMode.minute => minute.inverted(),
-          _ => minute,
-        },
-      );
+      buffer.write(minute.inverted(iff: focusMode == _FocusMode.minute));
       buffer.write(" : ");
 
       /// AM/PM
-      buffer.write(
-        switch (focusMode) {
-          _FocusMode.meridiem => meridiem.inverted(),
-          _ => meridiem,
-        },
-      );
+      buffer.write(meridiem.inverted(iff: focusMode == _FocusMode.meridiem));
 
       stdout.write$(buffer);
     }
@@ -149,13 +139,20 @@ Option<DateTime> timePrompt(
                   activeHour -= 1;
                   activeHour += 1;
                   activeHour %= 12;
+                  if (activeHour == 11) {
+                    activeMeridiem = activeMeridiem.inverse;
+                  }
+
                   activeHour += 1;
                 case <int>[0x1b, 0x5b, 0x42]:
                   // down
-
                   activeHour -= 1;
                   activeHour -= 1;
                   activeHour %= 12;
+                  if (activeHour == 10) {
+                    activeMeridiem = activeMeridiem.inverse;
+                  }
+
                   activeHour += 1;
                 case <int>[0x1b, 0x5b, 0x43]:
                   // right
@@ -189,12 +186,12 @@ Option<DateTime> timePrompt(
                 case <int>[0x20]:
                 //space
                 case <int>[0x1b, 0x5b, 0x41]:
-                // up
+                  // up
                 case <int>[0x1b, 0x5b, 0x42]:
                   // down
                   activeMeridiem = switch (activeMeridiem) {
-                    _Meridiem.am => _Meridiem.pm,
-                    _Meridiem.pm => _Meridiem.am,
+                    Meridiem.am => Meridiem.pm,
+                    Meridiem.pm => Meridiem.am,
                   };
                 case <int>[0x1b, 0x5b, 0x43]:
                   // right
@@ -218,7 +215,7 @@ Option<DateTime> timePrompt(
         ..write("+".color(accentColor))
         ..write(" $formattedQuestion ")
         ..write(
-          ("${"$activeHour".padLeft(2, "0")}:${"$activeMinute".padLeft(2, "0")} $activeMeridiem")
+          "${"$activeHour".padLeft(2, "0")}:${"$activeMinute".padLeft(2, "0")} $activeMeridiem"
               .color(accentColor),
         );
 
@@ -231,10 +228,10 @@ Option<DateTime> timePrompt(
         start.month,
         start.day,
         switch (activeMeridiem) {
-          _Meridiem.am when activeHour == 12 => 0,
-          _Meridiem.am => activeHour,
-          _Meridiem.pm when activeHour == 12 => 12,
-          _Meridiem.pm => activeHour + 12,
+          Meridiem.am when activeHour == 12 => 0,
+          Meridiem.am => activeHour,
+          Meridiem.pm when activeHour == 12 => 12,
+          Meridiem.pm => activeHour + 12,
         },
         activeMinute,
       ),

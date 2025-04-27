@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:math" as math;
 
+import "package:prompt/prompt.dart";
 import "package:prompt/src/types.dart";
 
 extension StringExtension on String {
@@ -24,7 +25,8 @@ extension StringExtension on String {
     List<String> buffer = <String>[];
 
     for (String word in words) {
-      if (buffer.join(" ") case String temp when buffer.isNotEmpty && temp.length + word.length >= columns) {
+      if (buffer.join(" ") case String temp
+          when buffer.isNotEmpty && temp.length + word.length >= columns) {
         lines.add(temp);
         buffer.clear();
       }
@@ -148,15 +150,18 @@ extension PredicateExtension<T> on Predicate<T> {
 }
 
 extension NullableFunctionalExtension<T> on T? {
-  void apply(void Function(T value) action) => switch (this) { T value => action(value), _ => null };
+  void apply(void Function(T value) action) =>
+      switch (this) { T value => action(value), _ => null };
   O? map<O>(O Function(T value) mapper) => switch (this) { T value => mapper(value), _ => null };
-  T? where(bool Function(T value) predicate) => switch (this) { T value when predicate(value) => value, _ => null };
+  T? where(bool Function(T value) predicate) =>
+      switch (this) { T value when predicate(value) => value, _ => null };
 }
 
 extension NonNullableFunctionalExtension<T extends Object> on T {
   void apply(void Function(T value) action) => action(this);
   O map<O>(O Function(T value) mapper) => mapper(this);
-  T? where(bool Function(T value) predicate) => switch (this) { T value when predicate(value) => value, _ => null };
+  T? where(bool Function(T value) predicate) =>
+      switch (this) { T value when predicate(value) => value, _ => null };
 }
 
 extension ListExtensionMethods<E> on List<E> {
@@ -197,6 +202,16 @@ extension DateExtension on DateTime {
 
     return "$h:$m:$s";
   }
+
+  String toAMPMTimeString() {
+    Meridiem meridiem = hour >= 12 ? Meridiem.pm : Meridiem.am;
+    String h = _twoDigits((hour - 1) % 12 + 1);
+    String m = _twoDigits(minute);
+
+    return "$h:$m $meridiem";
+  }
+
+  String toAMPMDateTimeString() => "${toDateString()}, ${toAMPMTimeString()}";
 
   DateTime minimalDate() => copyWith(
         hour: 0,

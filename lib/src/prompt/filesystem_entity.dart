@@ -7,6 +7,7 @@ import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
 import "package:prompt/src/io/exception.dart";
 import "package:prompt/src/io/stdio/block/stdout/context.dart";
+import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
 import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdin.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
@@ -28,7 +29,8 @@ int compareFileSystemEntity(FileSystemEntity a, FileSystemEntity b) => switch ((
       // And finally files.
       (File(), Directory()) => 1,
       // If the types are equal, then we compare their name alphabetically.
-      (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) => left.compareTo(right),
+      (FileSystemEntity(name: String left), FileSystemEntity(name: String right)) =>
+        left.compareTo(right),
     };
 
 int index = 0;
@@ -86,7 +88,8 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   // ignore: no_leading_underscores_for_local_identifiers
   void update({Directory? previous}) {
     children = activeDirectory.listSync()..sort(compareFileSystemEntity);
-    activeIndex = previous == null ? 0 : children.indexWhere((FileSystemEntity e) => e.path == previous.path);
+    activeIndex =
+        previous == null ? 0 : children.indexWhere((FileSystemEntity e) => e.path == previous.path);
 
     int intrinsicViewLimit = <int>{
       children.length,
@@ -163,21 +166,13 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
     stdout.eraseln();
     displayEntity(activeIndex, viewIndex);
     stdout.movelnStart();
-
-    /// Flush the stdout buffer.
-    stdout.moveDown(viewLimit - viewIndex);
-    stdout.writeln("${index + 1}");
-    stdout.moveUp(viewLimit - viewIndex + 1);
-
-    index += 1;
   }
 
   void moveUp() {
     if (activeIndex > 0) {
       --activeIndex;
 
-      if ((viewIndex - topDisparity > 0) || //
-          (activeIndex - topDisparity < 0)) {
+      if ((viewIndex - topDisparity > 0) || (activeIndex - topDisparity < 0)) {
         --viewIndex;
         stdout.moveUp();
 
@@ -287,7 +282,7 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
 
   try {
     stdout.push();
-    // stdout.hideCursor();
+    stdout.hideCursor();
 
     update();
 
