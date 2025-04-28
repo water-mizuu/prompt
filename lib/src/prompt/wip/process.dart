@@ -5,8 +5,9 @@
 import "dart:async";
 import "dart:isolate";
 
-import "package:prompt/prompt.dart";
 import "package:prompt/src/io/decoration/color.dart";
+import "package:prompt/src/io/stdio/block/stdout/hidden_cursor.dart";
+import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdout.dart";
 import "package:prompt/src/io/stdio/wrapper/wrapped_stdout.dart";
 

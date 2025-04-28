@@ -1,8 +1,6 @@
-import "dart:io";
 import "dart:math" as math;
 
 import "package:prompt/prompt.dart";
-import "package:prompt/src/types.dart";
 
 extension StringExtension on String {
   String padCenter(int count, [String character = " "]) {

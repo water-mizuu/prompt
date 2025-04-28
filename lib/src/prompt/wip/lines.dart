@@ -3,7 +3,6 @@ import "dart:math";
 import "package:prompt/src/extensions.dart";
 import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
-import "package:prompt/src/io/decoration/style.dart";
 import "package:prompt/src/io/exception.dart";
 import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdin.dart";
@@ -20,7 +19,7 @@ Option<String> linesPrompt(
   String? example,
   Color accentColor = Colors.brightBlue,
 }) {
-  String formattedQuestion = question.bold();
+  String formattedQuestion = question;
   int y = 0;
   int x = 0;
   List2<String> content = ""
@@ -51,9 +50,10 @@ Option<String> linesPrompt(
             .firstOrNull
             ?.takeWhile((String c) => c == " ")
             .length ??
-        0 - x;
+        0;
+    late int currentIndent = content[y].takeWhile((c) => c == " ").length;
 
-    if (y <= 0 || previousIndent <= 0) {
+    if (y <= 0 || previousIndent <= 0 || previousIndent == currentIndent) {
       // Just indent.
       stdout.moveRight(2);
       content[y].insertAll(x, List<String>.filled(2, " "));

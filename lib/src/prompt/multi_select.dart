@@ -73,7 +73,7 @@ Option<List<T>> multiSelectPrompt<T>(
   );
 
   void displayItemAt(int index, int viewIndex, {bool isActiveColorDisabled = false}) {
-    const ({String active, String bottom, String inactive, String top}) displays = (
+    const displays = (
       top: "-", // "∧"
       bottom: "-", // "∨"
       active: ">",

@@ -122,6 +122,9 @@ Option<DateTime> datePrompt(
             case <int>[0x1b, 0x5b, 0x41]:
             case <int>[0x1b, 0x5b, 0x42]:
               if (hasFailed) {
+                stdout.eraseln();
+                stdout.moveUp();
+                stdout.eraseln();
                 hasFailed = false;
                 redraw();
               }
@@ -470,9 +473,8 @@ Option<DateTime> datePrompt(
     void moveToTitleFromCalendar(_Focus to) {
       /// Remove the focus from the calendar.
       stdout.eraseln();
-      displayCalendarRow(activeY);
-
       focus = to;
+      displayCalendarRow(activeY);
 
       /// Rerender the title.
       stdout.moveUp(activeY + 1 /** Weekday Label */ + 1 /** Title Card */);

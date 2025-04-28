@@ -1,7 +1,6 @@
 import "package:prompt/src/extensions.dart";
 import "package:prompt/src/guard.dart";
 import "package:prompt/src/io/decoration/color.dart";
-import "package:prompt/src/io/decoration/style.dart";
 import "package:prompt/src/io/exception.dart";
 import "package:prompt/src/io/stdio/context.dart";
 import "package:prompt/src/io/stdio/wrapper/stdin.dart";
@@ -19,7 +18,7 @@ Option<String> linePrompt(
   bool showInput = true,
   String? mask,
 }) {
-  String formattedQuestion = question.bold();
+  String formattedQuestion = question;
   int x = 0;
   List<String> content = [];
 
@@ -32,6 +31,10 @@ Option<String> linePrompt(
   }
 
   void tab() {
+    if (showInput || mask != null) {
+      stdout.moveRight(2);
+    }
+
     x += 2;
   }
 

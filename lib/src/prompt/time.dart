@@ -15,9 +15,9 @@ enum Meridiem {
   String toString() => switch (this) { am => "AM", pm => "PM" };
 
   Meridiem get inverse => switch (this) {
-    am => pm,
-    pm => am,
-  };
+        am => pm,
+        pm => am,
+      };
 }
 
 Option<DateTime> timePrompt(
@@ -27,8 +27,8 @@ Option<DateTime> timePrompt(
   Color accentColor = TimePromptDefaults.accentColor,
 }) {
   start ??= DateTime.now();
-  String formattedQuestion = question.bold();
-  const ({int hour, int meridiem, int minute}) paddingSizes = (hour: 2, minute: 2, meridiem: 2);
+  String formattedQuestion = question;
+  const paddingSizes = (hour: 2, minute: 2, meridiem: 2);
 
   try {
     stdout.push();
@@ -186,7 +186,7 @@ Option<DateTime> timePrompt(
                 case <int>[0x20]:
                 //space
                 case <int>[0x1b, 0x5b, 0x41]:
-                  // up
+                // up
                 case <int>[0x1b, 0x5b, 0x42]:
                   // down
                   activeMeridiem = switch (activeMeridiem) {

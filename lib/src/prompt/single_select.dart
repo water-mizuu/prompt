@@ -66,7 +66,7 @@ Option<T> singleSelectPrompt<T>(
   );
 
   void displayItemAt(int index, int viewIndex, {bool colored = true}) {
-    const ({String active, String bottom, String inactive, String top}) displays = (
+    const displays = (
       top: "-",
       bottom: "-", // "∨"
       active: ">",

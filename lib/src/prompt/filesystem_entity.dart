@@ -40,12 +40,13 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   Directory? start,
   Guard<FileSystemEntity>? guard,
   String? hint,
+  bool displayFullPath = false,
   Color accentColor = FileSystemEntityPromptDefaults.accentColor,
 }) {
   start ??= Directory.current;
 
-  int topDisparity = 2;
-  int bottomDisparity = 2;
+  int topDisparity = 1;
+  int bottomDisparity = 1;
   Directory activeDirectory = start;
 
   bool hasFailed = false;
@@ -57,13 +58,27 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   late List<FileSystemEntity> children;
 
   void displayEntity(int index, int viewIndex, {bool isActive = true}) {
-    stdout.write("  ");
+    const displays = (
+      top: "-",
+      bottom: "-", // "∨"
+      active: ">",
+      inactive: " ",
+    );
 
+    stdout.write("  ");
+    late bool isNonFirstTopEdge = viewIndex == 0 && index > 0;
+    late bool isNonLastBottomEdge = viewIndex == viewLimit - 1 && index < children.length - 1;
     if (isActive && activeIndex == index) {
-      stdout.write("> ".brightBlue());
+      stdout.write(displays.active.brightBlue());
+    } else if (isNonFirstTopEdge) {
+      stdout.write(displays.top.brightBlack());
+    } else if (isNonLastBottomEdge) {
+      stdout.write(displays.bottom.brightBlack());
     } else {
-      stdout.write("  ");
+      stdout.write(displays.inactive.brightBlack());
     }
+
+    stdout.write(" ");
 
     if (children[index] case FileSystemEntity entity) {
       if (entity is Directory) {
@@ -88,8 +103,9 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
   // ignore: no_leading_underscores_for_local_identifiers
   void update({Directory? previous}) {
     children = activeDirectory.listSync()..sort(compareFileSystemEntity);
-    activeIndex =
-        previous == null ? 0 : children.indexWhere((FileSystemEntity e) => e.path == previous.path);
+    activeIndex = previous == null //
+        ? 0
+        : children.indexWhere((FileSystemEntity e) => e.path == previous.path);
 
     int intrinsicViewLimit = <int>{
       children.length,
@@ -332,7 +348,21 @@ Option<FileSystemEntity> fileSystemEntityPrompt(
     }
     stdout.write("+".color(accentColor));
     stdout.write(" $question ");
-    stdout.writeln(chosenEntity.path.color(accentColor));
+
+    if (displayFullPath) {
+      stdout.writeln(chosenEntity.path.color(accentColor));
+    } else {
+      String separator = Platform.pathSeparator;
+      String parentDirectory = chosenEntity.parent.compactPath;
+      String name = chosenEntity.path.split(separator).last;
+
+      StringBuffer buffer = StringBuffer()
+        ..write(parentDirectory)
+        ..write(separator)
+        ..write(name);
+
+      stdout.writeln(buffer.toString().color(accentColor));
+    }
 
     return Success<FileSystemEntity>(chosenEntity);
   } on SignalInterruptionException {
@@ -352,6 +382,7 @@ Option<File> filePrompt(
   Directory? start,
   Guard<File>? guard,
   String? hint,
+  bool displayFullPath = false,
   Color accentColor = FileSystemEntityPromptDefaults.accentColor,
 }) =>
     fileSystemEntityPrompt(
@@ -360,6 +391,7 @@ Option<File> filePrompt(
       guard: Guard<FSE>.unit((FSE entity) => entity is File, "Must be a file.")
           .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
+      displayFullPath: displayFullPath,
       accentColor: accentColor,
     ).map((FSE value) => value as File);
 
@@ -368,6 +400,7 @@ Option<Directory> directoryPrompt(
   Directory? start,
   Guard<Directory>? guard,
   String? hint,
+  bool displayFullPath = false,
   Color accentColor = FileSystemEntityPromptDefaults.accentColor,
 }) =>
     fileSystemEntityPrompt(
@@ -379,6 +412,7 @@ Option<Directory> directoryPrompt(
       ) //
           .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
+      displayFullPath: displayFullPath,
       accentColor: accentColor,
     ).map((FSE value) => value as Directory);
 
@@ -387,6 +421,7 @@ Option<Link> linkPrompt(
   Directory? start,
   Guard<Link>? guard,
   String? hint,
+  bool displayFullPath = false,
   Color accentColor = FileSystemEntityPromptDefaults.accentColor,
 }) =>
     fileSystemEntityPrompt(
@@ -398,6 +433,7 @@ Option<Link> linkPrompt(
       ) //
           .map((Guard<FSE> type) => guard != null ? type & guard : type),
       hint: hint,
+      displayFullPath: displayFullPath,
       accentColor: accentColor,
     ).map((FSE value) => value as Link);
 
@@ -407,6 +443,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
     Directory? start,
     Guard<FileSystemEntity>? guard,
     String? hint,
+    bool displayFullPath = false,
     Color accentColor = FileSystemEntityPromptDefaults.accentColor,
   }) =>
       fileSystemEntityPrompt(
@@ -414,6 +451,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
         start: start,
         guard: guard,
         hint: hint,
+        displayFullPath: displayFullPath,
         accentColor: accentColor,
       );
 
@@ -422,6 +460,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
     Directory? start,
     Guard<Directory>? guard,
     String? hint,
+    bool displayFullPath = false,
     Color accentColor = FileSystemEntityPromptDefaults.accentColor,
   }) =>
       directoryPrompt(
@@ -429,6 +468,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
         start: start,
         guard: guard,
         hint: hint,
+        displayFullPath: displayFullPath,
         accentColor: accentColor,
       );
 
@@ -437,6 +477,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
     Directory? start,
     Guard<File>? guard,
     String? hint,
+    bool displayFullPath = false,
     Color accentColor = FileSystemEntityPromptDefaults.accentColor,
   }) =>
       filePrompt(
@@ -444,6 +485,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
         start: start,
         guard: guard,
         hint: hint,
+        displayFullPath: displayFullPath,
         accentColor: accentColor,
       );
 
@@ -452,6 +494,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
     Directory? start,
     Guard<Link>? guard,
     String? hint,
+    bool displayFullPath = false,
     Color accentColor = FileSystemEntityPromptDefaults.accentColor,
   }) =>
       linkPrompt(
@@ -459,6 +502,7 @@ extension PromptFileSystemEntityExtension on BasePrompt {
         start: start,
         guard: guard,
         hint: hint,
+        displayFullPath: displayFullPath,
         accentColor: accentColor,
       );
 }

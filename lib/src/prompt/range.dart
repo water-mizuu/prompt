@@ -35,7 +35,18 @@ Option<int> rangePrompt(
 
   bool hasFailed = false;
 
+  void clearFailure() {
+    if (!hasFailed) return;
+
+    stdout.eraseln();
+    stdout.moveUp();
+  }
+
   void flagFailure(String message) {
+    if (hasFailed) {
+      clearFailure();
+    }
+
     hasFailed = true;
 
     stdout.eraseln();
@@ -90,14 +101,8 @@ Option<int> rangePrompt(
     stdout.write("[$min, $max]".brightBlack());
     stdout.write(" $activeValue ".color(accentColor));
     stdout.write("// Arrow keys to change".brightBlack());
-
     loop:
     for (List<int> code in stdin.sync) {
-      if (hasFailed) {
-        stdout.eraseln();
-        stdout.movelnUp();
-      }
-
       switch (code) {
         case <int>[0x03]:
           throw SignalInterruptionException();
@@ -109,11 +114,17 @@ Option<int> rangePrompt(
             break loop;
           }
 
-        case <int>[0x1b, 0x5b, 0x41]:
+        case <int>[0x1b, 0x5b, 0x41]: // up
+          if (hasFailed) {
+            clearFailure();
+          }
           hasFailed = false;
           activeValue = math.min(max, activeValue + step);
 
-        case <int>[0x1b, 0x5b, 0x42]:
+        case <int>[0x1b, 0x5b, 0x42]: // down
+          if (hasFailed) {
+            clearFailure();
+          }
           hasFailed = false;
           activeValue = math.max(min, activeValue - step);
       }

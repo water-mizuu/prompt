@@ -16,13 +16,15 @@ enum Month {
 
   @override
   String toString() {
-    var [String first, ...List<String> rest] = super.toString().split(".").last.split("");
+    var [_, String name] = super.toString().split(".");
+    var [String first, ...List<String> rest] = name.split("");
 
     return first.toUpperCase() + rest.join();
   }
 }
 
 void main() async {
+  // prompt("What's your name?");
   // prompt.time("Said I'm fine but it wasn't true,");
   // prompt.dateTime(
   //   "Hello there!",
@@ -34,7 +36,7 @@ void main() async {
   //   guard: Guard.unit((DateTime v) => v.isAfter(DateTime.now()), "Must be after today!"),
   // );
 
-  // String? lines = prompt
+  // prompt
   //     .line(
   //       "Tell us about yourself",
   //       guard: Guards.stringIsNotEmpty(),
@@ -44,25 +46,33 @@ void main() async {
   // prompt.double("A double greater than pi.", guard: Guards.doubleGreaterThan(3.14));
   // prompt.bigInt("A large integer", guard: Guards.greaterThan(200.n));
   // prompt.bool("Do you agree?".doubleUnderlined());
-  prompt.select(
-    "Which is your most favorite?",
-    choices: Month.values,
-    guard: Guards.notEquals(Month.march),
-  );
+  // prompt.select(
+  //   "Which is your most favorite?",
+  //   choices: Month.values,
+  //   guard: Guards.notEquals(Month.march),
+  // );
   // prompt.select.multi(
   //   "What are your favorite months?",
   //   choices: Month.values,
   //   guard: Guards.listContains(Month.march),
   // );
-  // prompt.int("An odd integer.", guard: Guards.intIsOdd());
-  // var birthday = prompt
-  //     .date(
-  //       "When is your birthday?",
-  //       hint: "The year will be ignored.",
-  //       guard: Guards.beforeNow(),
-  //       minimal: true,
-  //     )
-  //     .orElse(() => DateTime.now());
-
+  prompt.int("An odd integer.", guard: Guards.intIsOdd());
+  prompt
+      .date(
+        "When is your birthday?",
+        hint: "The year will be ignored.",
+        guard: Guards.beforeNow(),
+        minimal: false,
+      )
+      .orElse(() => DateTime.now());
+  prompt
+      .date(
+        "When is your birthday?",
+        hint: "The year will be ignored.",
+        guard: Guards.beforeNow(),
+        minimal: true,
+      )
+      .orElse(() => DateTime.now());
+  prompt.file("Select your file.");
   // stdout.box(birthday);
 }
