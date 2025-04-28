@@ -21,7 +21,9 @@ extension StdinExtension on WrappedStdin {
   /// be handled by the receiver.
   Iterable<List<int>> get sync sync* {
     while (true) {
-      yield readSync();
+      if (readSync() case var list when list.isNotEmpty) {
+        yield list;
+      }
     }
   }
 
@@ -30,11 +32,12 @@ extension StdinExtension on WrappedStdin {
   /// Escape code SIGINT `0x03` cuts the [Iterable].
   Iterable<List<int>> get syncInterrupt sync* {
     while (true) {
-      List<int> read = readSync();
-      if (read case <int>[0x03]) {
-        return;
+      if (readSync() case var read when read.isNotEmpty) {
+        if (read case <int>[0x03]) {
+          return;
+        }
+        yield read;
       }
-      yield read;
     }
   }
 

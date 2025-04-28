@@ -24,6 +24,9 @@ enum Month {
 }
 
 void main() async {
+  for (List<int> key in stdin.syncInterrupt) {
+    stdout.box(key.map((int v) => v.map((int c) => c.toRadixString(16).padLeft(2, "0"))).toList());
+  }
   // prompt("What's your name?");
   // prompt.time("Said I'm fine but it wasn't true,");
   // prompt.dateTime(
@@ -62,7 +65,6 @@ void main() async {
         "When is your birthday?",
         hint: "The year will be ignored.",
         guard: Guards.beforeNow(),
-        minimal: false,
       )
       .orElse(() => DateTime.now());
   prompt
